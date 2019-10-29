@@ -1,0 +1,56 @@
+{
+  "name": "vuex-composition",
+  "version": "1.0.0",
+  "description": "Composition API for Vuex",
+  "keywords": [
+    "vuex",
+    "vue",
+    "composition",
+    "api",
+    "functional"
+  ],
+  "homepage": "https://github.com/stevethedev/vuex-composition#readme",
+  "bugs": {
+    "url": "https://github/com/stevethedev/vuex-composition/issues"
+  },
+  "main": "dist/cjs/index.js",
+  "module": "dist/es/index.js",
+  "scripts": {
+    "build": "npm run build:es && npm run build:cjs",
+    "build:es": "tsc --module esnext --outDir dist/es",
+    "build:cjs": "tsc --module commonjs --outDir dist/cjs",
+    "test": "jest --coverage",
+    "lint": "npm run lint:tsc && npm run lint:tslint",
+    "lint:tsc": "tsc --noEmit",
+    "lint:tslint": "tslint -c tslint.json -p .",
+    "preversion": "npm run lint && npm run test && npm run build",
+    "prepublish": "npm run lint && npm run test && npm run build"
+  },
+  "author": {
+    "name": "Steven Jimenez",
+    "email": "steven@stevethedev.com",
+    "url": "https://www.stevethedev.com"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@vue/composition-api": "^0.3.2",
+    "vue": "^2.6.10",
+    "vuex": "^3.1.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^24.0.20",
+    "@vue/test-utils": "^1.0.0-beta.29",
+    "jest": "^24.9.0",
+    "jsdom": "^15.2.0",
+    "jsdom-global": "^3.0.2",
+    "prettier": "^1.18.2",
+    "ts-jest": "^24.1.0",
+    "tslib": "^1.10.0",
+    "tslint": "^5.20.0",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^3.6.4",
+    "vue-jest": "^3.0.5",
+    "vue-template-compiler": "^2.6.10",
+    "vuex-functional": "^1.0.3"
+  }
+}
