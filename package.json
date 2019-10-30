@@ -35,7 +35,8 @@
   "dependencies": {
     "@vue/composition-api": "^0.3.2",
     "vue": "^2.6.10",
-    "vuex": "^3.1.1"
+    "vuex": "^3.1.1",
+    "vuex-functional": "^1.0.3"
   },
   "devDependencies": {
     "@types/jest": "^24.0.20",
@@ -50,7 +51,6 @@
     "tslint-config-prettier": "^1.18.0",
     "typescript": "^3.6.4",
     "vue-jest": "^3.0.5",
-    "vue-template-compiler": "^2.6.10",
-    "vuex-functional": "^1.0.3"
+    "vue-template-compiler": "^2.6.10"
   }
 }

@@ -14,10 +14,10 @@ export const state = StateRef.create;
 
 export type StateFunction = () => {
   [key: string]:
-    | ActionRef<unknown, any>
-    | GetterRef<unknown, any>
+    | ActionRef<any>
+    | GetterRef<any>
     | ModuleRef<unknown>
-    | MutationRef<any>
+    | (MutationRef<any> & ((...args: any[]) => void))
     | StateRef<any>;
 };
 
@@ -59,25 +59,27 @@ export function createStore<T extends StateFunction>(
   const store = V.into<typeof mod>(new Vuex.Store(mod as any));
 
   Object.entries(opt).forEach(([key, value]) => {
-    if (value instanceof StateRef) {
-      value.setStore(store, key);
+    if ((value as any).setStore) {
+      (value as any).setStore(store, key);
     }
   });
 
   return store;
 }
 
-function processOptions<T extends StateFunction>(
-  obj: StoreParam<T>
-): { mod: StoreModule<T>; opt: T extends () => infer R ? R : never } {
-  const opt: ReturnType<T> = obj.setup();
+function processOptions<
+  T extends StateFunction,
+  R extends ReturnType<StateFunction>
+>(obj: StoreParam<T>): { mod: StoreModule<T>; opt: R } {
+  const opt: R = obj.setup() as R;
   const mod = Object.entries(opt).reduce(
     (result: Options<StoreModule<T>>, [key, value]) => {
       if (!result[value.type]) {
         result[value.type] = {} as any;
       }
 
-      (result as StoreModule<T>)[value.type][key] = value.value;
+      (result as StoreModule<T>)[value.type][key] =
+        value[value.type] || value.value;
 
       return result;
     },

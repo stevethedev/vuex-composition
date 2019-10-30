@@ -1,4 +1,3 @@
-import { Store } from "vuex";
 import { JustTypes } from "./just";
 import { Ref } from "./ref";
 
