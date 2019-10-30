@@ -80,8 +80,8 @@ export class GetterRef<T extends () => any> implements Ref<ReturnType<T>> {
    * @param store contains the production-version of the store.
    * @param title names the variable on the store.
    */
-  public setStore(store: Store<any>, title: string) {
+  public setStore(store: Store<any>, title: string, path: string) {
     this.store = store;
-    this.title = title;
+    this.title = "" === path ? title : `${path}/${title}`;
   }
 }

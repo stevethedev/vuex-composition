@@ -1,41 +1,64 @@
 import Vuex from "vuex";
 import V, { Store } from "vuex-functional";
-import { ActionExtract, ActionRef } from "./action-ref";
-import { GetterExtract, GetterRef } from "./getter-ref";
-import { ModuleExtract, ModuleRef } from "./module-ref";
-import { MutationExtract, MutationRef } from "./mutation-ref";
-import { StateExtract, StateRef } from "./state-ref";
+import {
+  getOptions,
+  processOptions,
+  setStore,
+  StateFunction,
+  StoreModule,
+  StoreParam
+} from "./module.defs";
 
+import { ActionRef } from "./action-ref";
+import { GetterRef } from "./getter-ref";
+import { ModuleRef } from "./module-ref";
+import { MutationRef } from "./mutation-ref";
+import { StateRef } from "./state-ref";
+
+/**
+ * Create an indirect reference for Action entries.
+ *
+ * @template T provides type-hinting for the action.
+ *
+ * @param value is the value to set in the reference.
+ */
 export const action = ActionRef.create;
+
+/**
+ * Create an indirect reference for Getter entries.
+ *
+ * @template T provides type-hinting for the getter.
+ *
+ * @param value is the value to set in the reference.
+ */
 export const getter = GetterRef.create;
+
+/**
+ * Create an indirect reference for Module entries.
+ *
+ * @template T provides type-hinting for the module.
+ *
+ * @param value is the value to set in the reference.
+ */
 export const module = ModuleRef.create;
+
+/**
+ * Create an indirect reference for Mutation entries.
+ *
+ * @template T provides type-hinting for the mutation.
+ *
+ * @param value is the value to set in the reference.
+ */
 export const mutation = MutationRef.create;
+
+/**
+ * Create an indirect reference for State entries.
+ *
+ * @template T provides type-hinting for the variable.
+ *
+ * @param value is the value to set in the reference.
+ */
 export const state = StateRef.create;
-
-export type StateFunction = () => {
-  [key: string]:
-    | ActionRef<any>
-    | GetterRef<any>
-    | ModuleRef<unknown>
-    | (MutationRef<any> & ((...args: any[]) => void))
-    | StateRef<any>;
-};
-
-export interface StoreModule<T> {
-  namespaced?: boolean;
-  state: StateExtract<T>;
-  getters: GetterExtract<T>;
-  mutations: MutationExtract<T>;
-  actions: ActionExtract<T>;
-  modules: ModuleExtract<T>;
-}
-
-export interface StoreParam<T extends StateFunction> {
-  namespaced?: boolean;
-  setup: T;
-}
-
-type Options<T> = { [key in keyof T]?: T[key] };
 
 // export function createModule<T>(obj: StoreParam<T>): StoreModule<T> {
 //   return Object.entries(obj.setup()).reduce(
@@ -55,36 +78,10 @@ type Options<T> = { [key in keyof T]?: T[key] };
 export function createStore<T extends StateFunction>(
   obj: StoreParam<T>
 ): Store<StoreModule<T>> {
-  const { mod, opt } = processOptions(obj);
-  const store = V.into<typeof mod>(new Vuex.Store(mod as any));
-
-  Object.entries(opt).forEach(([key, value]) => {
-    if ((value as any).setStore) {
-      (value as any).setStore(store, key);
-    }
-  });
+  const opt = getOptions(obj);
+  const mod = processOptions(opt);
+  const store = V.into<StoreModule<T>>(new Vuex.Store(mod as any));
+  setStore(opt, store, "");
 
   return store;
-}
-
-function processOptions<
-  T extends StateFunction,
-  R extends ReturnType<StateFunction>
->(obj: StoreParam<T>): { mod: StoreModule<T>; opt: R } {
-  const opt: R = obj.setup() as R;
-  const mod = Object.entries(opt).reduce(
-    (result: Options<StoreModule<T>>, [key, value]) => {
-      if (!result[value.type]) {
-        result[value.type] = {} as any;
-      }
-
-      (result as StoreModule<T>)[value.type][key] =
-        value[value.type] || value.value;
-
-      return result;
-    },
-    {}
-  ) as StoreModule<T>;
-
-  return { mod, opt };
 }

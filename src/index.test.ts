@@ -7,7 +7,7 @@ import {
   // createModule,
   createStore,
   getter,
-  // module,
+  module,
   mutation,
   state
 } from ".";
@@ -16,15 +16,28 @@ Vue.use(Vuex);
 
 const options = {
   setup: () => {
-    // const myModule = createModule({
-    //   namespaced: true,
-    //   setup: () => {
-    //     const bar = state("bar");
-    //     return {
-    //       getBar: getter(() => bar.value)
-    //     };
-    //   }
-    // });
+    const nsModule = module({
+      namespaced: true,
+      setup: () => {
+        const bar = state("bar");
+
+        const getBar = getter(() => bar.value);
+
+        return {
+          bar,
+          getBar
+        };
+      }
+    });
+
+    const bModule = module({
+      namespaced: false,
+      setup: () => {
+        const getNamespacedBar = getter(() => nsModule());
+
+        return { getNamespacedBar };
+      }
+    });
 
     const foo = state("bar");
     const getFoo = getter(() => foo.value);
@@ -62,12 +75,11 @@ const options = {
 
       SET_FOO_AND_BAH,
 
-      // SET_FOO: mutation((payload: { foo: string }) => {
-      //   foo.value = payload.foo;
-      // }),
       actionSend,
-      secondTier
-      // myModule: module(myModule)
+      secondTier,
+
+      nsModule,
+      bModule
     };
   }
 };
@@ -176,8 +188,30 @@ test("Can nest actions", async () => {
 
   expect(actions).toEqual(["secondTier", "actionSend", "actionSend"]);
 });
-// x.state;
-// x.getters;
-// x.mutations;
-// x.actions;
-// x.modules;
+test("Can use unexported modules", () => {
+  let found = false;
+
+  const $module = module({
+    setup: () => {
+      found = true;
+      return { foo: getter(() => found) };
+    }
+  });
+
+  expect(found).toBe(true);
+  expect($module(self => self.foo.value)).toEqual(found);
+});
+
+test("Can use un-namespaced modules", () => {
+  const $store = createStore(options);
+  const $module = V.modules($store).bModule;
+  // TODO: Figure out the getters, here.
+  // $module.getters;
+});
+
+test("Can use namespaced modules", () => {
+  // const $store = createStore(options);
+  // const $module = V.modules($store).nsModule;
+  // TODO: Figure out the getters, here.
+  // $module.getters;
+});
