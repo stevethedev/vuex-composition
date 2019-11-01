@@ -1,6 +1,5 @@
 import Vue from "vue";
 import Vuex from "vuex";
-// tslint-ignore-next-line
 import V from "vuex-functional";
 import {
   action,
