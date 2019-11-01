@@ -1,6 +1,7 @@
 import { Store } from "vuex";
 import { Functor } from "./functor";
 import { JustTypes } from "./just";
+import { ModuleRef } from "./module-ref";
 import { Ref } from "./ref";
 
 /**
@@ -76,10 +77,16 @@ export class ActionRef<T extends (payload: any) => Promise<any>>
    */
   public title?: string;
 
+  /**
+   * The module that hosts this structure.
+   */
+  private parentModule?: ModuleRef<any>;
+
   constructor(value: T) {
     super((async payload => {
-      if (this.store && this.title) {
-        return this.store.dispatch(this.title, payload);
+      const dispatch = this.getDispatchName();
+      if (this.store && dispatch) {
+        return this.store.dispatch(dispatch, payload);
       }
       return this.value(payload);
     }) as T);
@@ -93,8 +100,26 @@ export class ActionRef<T extends (payload: any) => Promise<any>>
    * @param store contains the production-version of the store.
    * @param title names the variable on the store.
    */
-  public setStore(store: Store<any>, title: string, path: string) {
+  public setStore(
+    store: Store<any>,
+    title: string,
+    parentModule?: ModuleRef<any>
+  ) {
     this.store = store;
-    this.title = "" === path ? title : `${path}/${title}`;
+    this.title = title;
+    this.parentModule = parentModule;
+  }
+
+  /**
+   * Retrieves the internal Dispatch name.
+   */
+  private getDispatchName(): string | null {
+    if (this.store && this.title) {
+      const path = this.parentModule
+        ? this.parentModule.getPath().join("/")
+        : null;
+      return path ? `${path}/${this.title}` : this.title;
+    }
+    return null;
   }
 }

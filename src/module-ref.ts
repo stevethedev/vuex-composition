@@ -8,35 +8,59 @@ import {
   StateFunction,
   StoreModule,
   StoreParam
-} from "./module.defs";
+} from "./module-defs";
 import { Ref } from "./ref";
 
-export type JustModules<O> = JustTypes<O, ModuleRef<any, any>>;
+/**
+ * Filters modules out of a larger object.
+ */
+export type JustModules<O> = JustTypes<O, ModuleRef<any>>;
 
+/**
+ * Extracts the module from the generated module information.
+ */
 export type ModuleExtract<T> = T extends (...args: any[]) => infer D
   ? {
       [key in keyof JustModules<D>]: JustModules<D>[key] extends ModuleRef<
-        any,
         infer R
       >
-        ? R
+        ? StoreModule<R["setup"]>
         : never;
     }
   : never;
 
-type InternalFunction<S, R = S> = (fn?: (self: S) => R) => R;
+/**
+ * Defines the function behavior in the constructor.
+ *
+ * @template S contains the value of the `self` variable.
+ */
+type InternalFunction<S> = ((fn?: (self: S) => unknown) => unknown) & (() => S);
 
-export class ModuleRef<S extends StateFunction, T extends StoreParam<S>>
-  extends Functor<InternalFunction<ReturnType<S>, any>>
-  implements Ref<StoreModule<ReturnType<S>>> {
+/**
+ * Represents a module reference, which will later be used to generate modules.
+ */
+export class ModuleRef<T extends StoreParam<any>>
+  extends Functor<InternalFunction<ReturnType<T["setup"]>>>
+  implements Ref<ReturnType<T["setup"]>> {
   public static create = <S extends StateFunction, T extends StoreParam<S>>(
     value: T
-  ): InternalFunction<ReturnType<S>, any> & ModuleRef<S, T> =>
+  ): InternalFunction<ReturnType<T["setup"]>> & ModuleRef<T> =>
     new ModuleRef(value) as any;
 
-  public readonly value: StoreModule<ReturnType<S>>;
+  /**
+   * Contains the return type of the `setup` function, which defines the moudle.
+   */
+  public readonly value: ReturnType<T["setup"]>;
+
+  /**
+   * Differentiates this type from other ref types.
+   */
   public readonly type = "modules";
-  public readonly modules: ReturnType<S>;
+
+  /**
+   * Contains the value that is pushed back to the main process.
+   */
+  public readonly modules: StoreModule<ReturnType<T["setup"]>>;
 
   /**
    * Reference to the store this is attached to.
@@ -44,17 +68,26 @@ export class ModuleRef<S extends StateFunction, T extends StoreParam<S>>
   public store?: Store<any>;
 
   /**
-   * Name of the variable within the store.
+   * Name of the store module.
    */
   public title?: string;
 
-  private raw: T;
+  /**
+   * Contains a reference to the module that owns this reference.
+   */
+  private parentModule?: ModuleRef<any>;
+
+  /**
+   * The raw configuration value passed into the constructor.
+   */
+  private readonly raw?: T;
 
   constructor(value: T) {
-    super((fn = self => self) => fn(this.modules));
+    super((fn = self => self) => fn(this.value));
     this.raw = value;
-    this.modules = getOptions(this.raw);
-    this.value = processOptions(this.modules);
+    this.value = getOptions(this.raw);
+    this.modules = processOptions(this.value);
+    this.modules.namespaced = this.raw.namespaced;
   }
 
   /**
@@ -63,11 +96,34 @@ export class ModuleRef<S extends StateFunction, T extends StoreParam<S>>
    * @param store contains the production-version of the store.
    * @param title names the variable on the store.
    */
-  public setStore(store: Store<any>, title: string, path: string = "") {
-    setStore(
-      this.modules,
-      store,
-      this.raw.namespaced ? ("" === path ? title : `${path}/${title}`) : path
-    );
+  public setStore(
+    store: Store<any>,
+    title: string,
+    parentModule?: ModuleRef<any>
+  ) {
+    this.parentModule = parentModule;
+    this.title = title;
+    setStore(this.value, store, this);
+  }
+
+  /**
+   * Retrieves the path to this module.
+   */
+  public getPath(): string[] {
+    return this.getAncestors()
+      .filter(mod => mod.modules.namespaced)
+      .map(mod => mod.title || "")
+      .filter(Boolean);
+  }
+
+  /**
+   * Retrieves the list of ancestor modules that generated this one.
+   */
+  public getAncestors(): Array<ModuleRef<any>> {
+    const result = this.parentModule ? this.parentModule.getAncestors() : [];
+    if (this.title) {
+      result.push(this);
+    }
+    return result;
   }
 }

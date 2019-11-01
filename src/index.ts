@@ -7,7 +7,7 @@ import {
   StateFunction,
   StoreModule,
   StoreParam
-} from "./module.defs";
+} from "./module-defs";
 
 import { ActionRef } from "./action-ref";
 import { GetterRef } from "./getter-ref";
@@ -60,28 +60,13 @@ export const mutation = MutationRef.create;
  */
 export const state = StateRef.create;
 
-// export function createModule<T>(obj: StoreParam<T>): StoreModule<T> {
-//   return Object.entries(obj.setup()).reduce(
-//     (result: Options<StoreModule<T>>, [key, value]) => {
-//       if (!result[value.type]) {
-//         result[value.type] = {} as any;
-//       }
-
-//       (result as StoreModule<T>)[value.type][key] = value.value;
-
-//       return result;
-//     },
-//     {}
-//   ) as StoreModule<T>;
-// }
-
 export function createStore<T extends StateFunction>(
   obj: StoreParam<T>
 ): Store<StoreModule<T>> {
   const opt = getOptions(obj);
   const mod = processOptions(opt);
   const store = V.into<StoreModule<T>>(new Vuex.Store(mod as any));
-  setStore(opt, store, "");
+  setStore(opt, store);
 
   return store;
 }

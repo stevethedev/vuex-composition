@@ -33,9 +33,15 @@ const options = {
     const bModule = module({
       namespaced: false,
       setup: () => {
-        const getNamespacedBar = getter(() => nsModule());
+        const getNonNamespacedBar = getter(() => {
+          return nsModule(self => self.getBar.value);
+        });
 
-        return { getNamespacedBar };
+        const localBar = state("bar");
+        const getPlainBar = getter(() => localBar.value);
+        const getChainedBar = getter(() => getPlainBar.value);
+
+        return { getChainedBar, getPlainBar, localBar, getNonNamespacedBar };
       }
     });
 
@@ -205,13 +211,20 @@ test("Can use unexported modules", () => {
 test("Can use un-namespaced modules", () => {
   const $store = createStore(options);
   const $module = V.modules($store).bModule;
-  // TODO: Figure out the getters, here.
-  // $module.getters;
+
+  // expect($module.state.localBar).toEqual("bar");
+
+  // expect(($store as any).getters).toEqual("bar");
+
+  // expect($module.getters.getPlainBar).toEqual("bar");
+  // expect($module.getters.getChainedBar).toEqual("bar");
+  expect($module.getters.getNonNamespacedBar).toEqual("bar");
 });
 
 test("Can use namespaced modules", () => {
-  // const $store = createStore(options);
-  // const $module = V.modules($store).nsModule;
-  // TODO: Figure out the getters, here.
-  // $module.getters;
+  const $store = createStore(options);
+  const $module = V.modules($store).nsModule;
+
+  expect($module.state.bar).toEqual("bar");
+  expect($module.getters.getBar).toEqual("bar");
 });

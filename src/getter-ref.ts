@@ -1,5 +1,6 @@
 import { Store } from "vuex";
 import { JustTypes } from "./just";
+import { ModuleRef } from "./module-ref";
 import { Ref } from "./ref";
 
 /**
@@ -44,8 +45,11 @@ export class GetterRef<T extends () => any> implements Ref<ReturnType<T>> {
    * Executes the getter and retrieves the value.
    */
   public get value(): ReturnType<T> {
-    if (this.store && this.title) {
-      return this.store.getters[this.title];
+    if (this.store) {
+      const getterPath = this.getGetterPath();
+      if (getterPath) {
+        return this.store.getters[getterPath];
+      }
     }
     return this.getters();
   }
@@ -70,6 +74,11 @@ export class GetterRef<T extends () => any> implements Ref<ReturnType<T>> {
    */
   private title?: string;
 
+  /**
+   * Contains the module that owns this value.
+   */
+  private parentModule?: ModuleRef<any>;
+
   constructor(value: T) {
     this.getters = value;
   }
@@ -80,8 +89,26 @@ export class GetterRef<T extends () => any> implements Ref<ReturnType<T>> {
    * @param store contains the production-version of the store.
    * @param title names the variable on the store.
    */
-  public setStore(store: Store<any>, title: string, path: string) {
+  public setStore(
+    store: Store<any>,
+    title: string,
+    parentModule?: ModuleRef<any>
+  ) {
     this.store = store;
-    this.title = "" === path ? title : `${path}/${title}`;
+    this.title = title;
+    this.parentModule = parentModule;
+  }
+
+  /**
+   * Retrieves the internal module path as a string.
+   */
+  private getGetterPath(): string | null {
+    if (this.store && this.title) {
+      const path = this.parentModule
+        ? this.parentModule.getPath().join("/")
+        : null;
+      return path ? `${path}/${this.title}` : this.title;
+    }
+    return null;
   }
 }

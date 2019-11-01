@@ -12,7 +12,7 @@ export type StateFunction = () => {
   [key: string]:
     | ActionRef<any>
     | GetterRef<any>
-    | ModuleRef<any, any>
+    | ModuleRef<any>
     | MutationRef<any>
     | StateRef<any>;
 };
@@ -58,22 +58,29 @@ type Options<T> = { [key in keyof T]?: T[key] };
 export function setStore<T extends StateFunction>(
   opt: ReturnType<T>,
   store: Store<any>,
-  path: string
+  parentModule?: ModuleRef<any>
 ) {
   Object.entries(opt).forEach(([key, value]) => {
-    if ((value as any).setStore) {
-      console.log(path, "-", key, "-", value);
-      (value as any).setStore(store, key, path);
-    }
+    value.setStore(store, key, parentModule);
   });
 }
 
-export function getOptions<T extends StateFunction>(
-  obj: StoreParam<T>
-): ReturnType<T> {
-  return obj.setup() as any;
+/**
+ * Executes the `obj.setup` function and returns the result with some typings.
+ *
+ * @param obj The object with a setup value.
+ */
+export function getOptions<T extends StoreParam<any>>(
+  obj: T
+): ReturnType<T["setup"]> {
+  return obj.setup();
 }
 
+/**
+ * Pre-processing the modules.
+ *
+ * @param options are the result from the `setup` function.
+ */
 export function processOptions<T extends ReturnType<StateFunction>>(
   options: T
 ): StoreModule<T> {

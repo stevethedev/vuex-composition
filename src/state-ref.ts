@@ -1,5 +1,6 @@
 import { Store } from "vuex";
 import { JustTypes } from "./just";
+import { ModuleRef } from "./module-ref";
 import { Ref } from "./ref";
 
 /**
@@ -38,11 +39,12 @@ export class StateRef<T> implements Ref<T> {
   public static create = <T>(value: T) => new StateRef(value);
 
   /**
-   * Retrieve the internally-held value.
+   * Retrieve the internally-held value. TODO: This isn't retrieving variables properly. Regardless of namespace, module data is at this.store.state.path.to.module.variable
    */
   public get value(): T {
     if (this.store && this.title) {
-      return this.store.state[this.title];
+      const route = this.getGetterRoute();
+      return route.reduce((s, p) => s[p], this.store.state)[this.title];
     }
     return this.state;
   }
@@ -52,7 +54,8 @@ export class StateRef<T> implements Ref<T> {
    */
   public set value(val: T) {
     if (this.store && this.title) {
-      this.store.state[this.title] = val;
+      const route = this.getGetterRoute();
+      route.reduce((s, p) => s[p], this.store.state)[this.title] = val;
     }
     this.state = val;
   }
@@ -78,6 +81,11 @@ export class StateRef<T> implements Ref<T> {
    */
   private title?: string;
 
+  /**
+   * Contains a reference to the module that owns this reference.
+   */
+  private parentModule?: ModuleRef<any>;
+
   constructor(value: T) {
     this.value = this.state = value;
   }
@@ -88,8 +96,25 @@ export class StateRef<T> implements Ref<T> {
    * @param store contains the production-version of the store.
    * @param title names the variable on the store.
    */
-  public setStore(store: Store<any>, title: string, path: string) {
+  public setStore(
+    store: Store<any>,
+    title: string,
+    parentModule?: ModuleRef<any>
+  ) {
     this.store = store;
-    this.title = "" === path ? title : `${path}/${title}`;
+    this.title = title;
+    this.parentModule = parentModule;
+  }
+
+  /**
+   * Retrieves the routes that getters must traverse.
+   */
+  private getGetterRoute(): string[] {
+    return this.parentModule
+      ? this.parentModule
+          .getAncestors()
+          .map(ancestor => ancestor.title || "")
+          .filter(Boolean)
+      : [];
   }
 }
