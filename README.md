@@ -1,7 +1,7 @@
 # Vuex Composer
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/cbcf0e3eb3104da18df94bf45520663f)](https://www.codacy.com/manual/stevethedev/vuex-composition?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=stevethedev/vuex-composition&amp;utm_campaign=Badge_Grade)
-[![CodeFactor](https://www.codefactor.io/repository/github/stevethedev/vuex-functional/badge)](https://www.codefactor.io/repository/github/stevethedev/vuex-functional)
+[![CodeFactor](https://www.codefactor.io/repository/github/stevethedev/vuex-composition/badge)](https://www.codefactor.io/repository/github/stevethedev/vuex-composition)
 [![Snyk](https://img.shields.io/snyk/vulnerabilities/github/stevethedev/vuex-composition)](https://img.shields.io/snyk/vulnerabilities/github/stevethedev/vuex-composition)
 
 
