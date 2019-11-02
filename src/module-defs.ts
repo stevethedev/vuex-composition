@@ -1,4 +1,4 @@
-import { Store } from "vuex-functional";
+import { Store } from "vuex";
 import { ActionExtract, ActionRef } from "./action-ref";
 import { GetterExtract, GetterRef } from "./getter-ref";
 import { ModuleExtract, ModuleRef } from "./module-ref";
