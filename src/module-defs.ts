@@ -82,7 +82,7 @@ export function getOptions<T extends StoreParam<any>>(
  * @param options are the result from the `setup` function.
  */
 export function processOptions<T extends StateFunction>(
-  options: T
+  options: ReturnType<T>
 ): StoreModule<T> {
   return Object.entries(options).reduce(
     (result: Options<StoreModule<T>>, [key, value]) => {
