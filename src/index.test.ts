@@ -13,75 +13,93 @@ import {
 
 Vue.use(Vuex);
 
+const getFooOptions = () => {
+  const foo = state("bar");
+  const getFoo = getter(() => foo.value);
+  const getFooFoo = getter(() => getFoo.value + getFoo.value);
+  const SET_FOO = mutation((payload: { foo: string }) => {
+    foo.value = payload.foo;
+  });
+
+  return { foo, getFoo, getFooFoo, SET_FOO };
+};
+
+const getBahOptions = () => {
+  const bah = state("bah");
+  const SET_BAH = mutation((payload: { bah: string }) => {
+    bah.value = payload.bah;
+  });
+
+  return { bah, SET_BAH };
+};
+
+const getFooBahOptions = (
+  fooOptions: ReturnType<typeof getFooOptions>,
+  bahOptions: ReturnType<typeof getBahOptions>
+) => {
+  const SET_FOO_AND_BAH = mutation((payload: { foo: string; bah: string }) => {
+    bahOptions.SET_BAH({ bah: payload.bah });
+    fooOptions.SET_FOO({ foo: payload.foo });
+  });
+
+  return { SET_FOO_AND_BAH };
+};
+
+const getActions = () => {
+  const actionSend = action(async (payload: string) => [payload, payload]);
+  const secondTier = action(async (payload: string) => [
+    ...(await actionSend(payload)),
+    ...(await actionSend(payload))
+  ]);
+
+  return { actionSend, secondTier };
+};
+
+const getNamespacedModule = () =>
+  module({
+    namespaced: true,
+    setup: () => {
+      const bar = state("bar");
+
+      const getBar = getter(() => bar.value);
+
+      return {
+        bar,
+        getBar
+      };
+    }
+  });
+
+const getBaseModule = (nsModule: ReturnType<typeof getNamespacedModule>) =>
+  module({
+    namespaced: false,
+    setup: () => {
+      const getNonNamespacedBar = getter(() => {
+        return nsModule(self => self.getBar.value);
+      });
+
+      const localBar = state("bar");
+      const getPlainBar = getter(() => localBar.value);
+      const getChainedBar = getter(() => getPlainBar.value);
+
+      return { getChainedBar, getPlainBar, localBar, getNonNamespacedBar };
+    }
+  });
+
 const options = {
   setup: () => {
-    const nsModule = module({
-      namespaced: true,
-      setup: () => {
-        const bar = state("bar");
-
-        const getBar = getter(() => bar.value);
-
-        return {
-          bar,
-          getBar
-        };
-      }
-    });
-
-    const bModule = module({
-      namespaced: false,
-      setup: () => {
-        const getNonNamespacedBar = getter(() => {
-          return nsModule(self => self.getBar.value);
-        });
-
-        const localBar = state("bar");
-        const getPlainBar = getter(() => localBar.value);
-        const getChainedBar = getter(() => getPlainBar.value);
-
-        return { getChainedBar, getPlainBar, localBar, getNonNamespacedBar };
-      }
-    });
-
-    const foo = state("bar");
-    const getFoo = getter(() => foo.value);
-    const getFooFoo = getter(() => getFoo.value + getFoo.value);
-    const SET_FOO = mutation((payload: { foo: string }) => {
-      foo.value = payload.foo;
-    });
-
-    const bah = state("bah");
-    const SET_BAH = mutation((payload: { bah: string }) => {
-      bah.value = payload.bah;
-    });
-
-    const SET_FOO_AND_BAH = mutation(
-      (payload: { foo: string; bah: string }) => {
-        SET_BAH({ bah: payload.bah });
-        SET_FOO({ foo: payload.foo });
-      }
-    );
-
-    const actionSend = action(async (payload: string) => [payload, payload]);
-    const secondTier = action(async (payload: string) => [
-      ...(await actionSend(payload)),
-      ...(await actionSend(payload))
-    ]);
+    const nsModule = getNamespacedModule();
+    const bModule = getBaseModule(nsModule);
+    const fooOptions = getFooOptions();
+    const bahOptions = getBahOptions();
+    const fooBahOptions = getFooBahOptions(fooOptions, bahOptions);
+    const actions = getActions();
 
     return {
-      foo,
-      getFoo,
-      getFooFoo,
-      SET_FOO,
-
-      bah,
-      SET_BAH,
-
-      SET_FOO_AND_BAH,
-
-      actionSend,
-      secondTier,
+      ...fooOptions,
+      ...bahOptions,
+      ...fooBahOptions,
+      ...actions,
 
       nsModule,
       bModule
