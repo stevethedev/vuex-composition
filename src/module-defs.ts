@@ -22,7 +22,7 @@ export type StateFunction = () => {
  *
  * @template T is the function that generated the options.
  */
-export interface StoreModule<T> {
+export interface StoreModule<T extends (...args: any[]) => any> {
   namespaced?: boolean;
   state: StateExtract<T>;
   getters: GetterExtract<T>;
@@ -81,7 +81,7 @@ export function getOptions<T extends StoreParam<any>>(
  *
  * @param options are the result from the `setup` function.
  */
-export function processOptions<T extends ReturnType<StateFunction>>(
+export function processOptions<T extends StateFunction>(
   options: T
 ): StoreModule<T> {
   return Object.entries(options).reduce(

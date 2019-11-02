@@ -17,15 +17,13 @@ export type JustActions<O> = JustTypes<O, ActionRef<any>>;
  *
  * @template T is the function that generates the value.
  */
-export type ActionExtract<T> = T extends (...args: any[]) => infer A
-  ? {
-      [key in keyof JustActions<A>]: JustActions<A>[key] extends ActionRef<
-        infer R
-      >
-        ? (arg: any, payload: Payload<R>) => ReturnType<R>
-        : (arg: any) => ReturnType<any>;
-    }
-  : never;
+export type ActionExtract<T extends (...args: any[]) => any> = {
+  [key in keyof JustActions<ReturnType<T>>]: JustActions<
+    ReturnType<T>
+  >[key] extends ActionRef<infer R>
+    ? (arg: any, payload: Payload<R>) => ReturnType<R>
+    : (arg: any) => ReturnType<any>;
+};
 
 /**
  * Extracts the payload type from the target function.

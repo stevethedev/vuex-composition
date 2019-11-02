@@ -15,13 +15,13 @@ type JustStates<O> = JustTypes<O, StateRef<any>>;
  *
  * @template T is the function that generates the value.
  */
-export type StateExtract<T> = T extends (...args: any[]) => infer G
-  ? {
-      [key in keyof JustStates<G>]: JustStates<G>[key] extends StateRef<infer R>
-        ? R
-        : never;
-    }
-  : never;
+export type StateExtract<T extends (...args: any[]) => any> = {
+  [key in keyof JustStates<ReturnType<T>>]: JustStates<
+    ReturnType<T>
+  >[key] extends StateRef<infer R>
+    ? R
+    : never;
+};
 
 /**
  * Indirect reference for State entries.

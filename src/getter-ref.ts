@@ -16,15 +16,13 @@ type JustGetters<O> = JustTypes<O, GetterRef<any>>;
  *
  * @template T is the function that generates the value.
  */
-export type GetterExtract<T> = T extends (...args: any[]) => infer G
-  ? {
-      [key in keyof JustGetters<G>]: JustGetters<G>[key] extends GetterRef<
-        infer R
-      >
-        ? R
-        : never;
-    }
-  : never;
+export type GetterExtract<T extends (...args: any[]) => any> = {
+  [key in keyof JustGetters<ReturnType<T>>]: JustGetters<
+    ReturnType<T>
+  >[key] extends GetterRef<infer R>
+    ? R
+    : never;
+};
 
 /**
  * Indirect reference for Getter entries.

@@ -19,15 +19,13 @@ export type JustModules<O> = JustTypes<O, ModuleRef<any>>;
 /**
  * Extracts the module from the generated module information.
  */
-export type ModuleExtract<T> = T extends (...args: any[]) => infer D
-  ? {
-      [key in keyof JustModules<D>]: JustModules<D>[key] extends ModuleRef<
-        infer R
-      >
-        ? StoreModule<R["setup"]>
-        : never;
-    }
-  : never;
+export type ModuleExtract<T extends (...args: any[]) => any> = {
+  [key in keyof JustModules<ReturnType<T>>]: JustModules<
+    ReturnType<T>
+  >[key] extends ModuleRef<infer R>
+    ? StoreModule<R["setup"]>
+    : never;
+};
 
 /**
  * Defines the function behavior in the constructor.
@@ -83,7 +81,9 @@ export class ModuleRef<T extends StoreParam<any>>
   private readonly raw?: T;
 
   constructor(value: T) {
-    super((fn = self => self) => fn(this.value));
+    super((fn: (self: ReturnType<T["setup"]>) => any = self => self) =>
+      fn(this.value)
+    );
     this.raw = value;
     this.value = getOptions(this.raw);
     this.modules = processOptions(this.value);

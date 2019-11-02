@@ -211,12 +211,10 @@ test("Can use un-namespaced modules", () => {
   const $store = createStore(options);
   const $module = V.modules($store).bModule;
 
-  // expect($module.state.localBar).toEqual("bar");
+  expect($module.state.localBar).toEqual("bar");
 
-  // expect(($store as any).getters).toEqual("bar");
-
-  // expect($module.getters.getPlainBar).toEqual("bar");
-  // expect($module.getters.getChainedBar).toEqual("bar");
+  expect($module.getters.getPlainBar).toEqual("bar");
+  expect($module.getters.getChainedBar).toEqual("bar");
   expect($module.getters.getNonNamespacedBar).toEqual("bar");
 });
 

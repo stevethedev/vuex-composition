@@ -17,15 +17,13 @@ export type JustMutations<O> = JustTypes<O, MutationRef<any>>;
  *
  * @template T is the function that generates the value.
  */
-export type MutationExtract<T> = T extends (...args: any[]) => infer M
-  ? {
-      [key in keyof JustMutations<M>]: JustMutations<
-        M
-      >[key] extends MutationRef<infer R>
-        ? (arg: any, payload: Payload<R>) => void
-        : (arg: any) => void;
-    }
-  : never;
+export type MutationExtract<T extends (...args: any[]) => any> = {
+  [key in keyof JustMutations<ReturnType<T>>]: JustMutations<
+    ReturnType<T>
+  >[key] extends MutationRef<infer R>
+    ? (arg: any, payload: Payload<R>) => void
+    : (arg: any) => void;
+};
 
 /**
  * Extracts the payload type from the target function.
