@@ -1,4 +1,4 @@
-import { Accessor } from "./accessor";
+import { Accessor, Payload } from "./accessor";
 import { getPath } from "./helpers";
 import { JustTypes } from "./just";
 import { Ref } from "./ref";
@@ -22,13 +22,6 @@ export type MutationExtract<T extends (...args: any[]) => any> = {
     ? (arg: any, payload: Payload<R>) => void
     : (arg: any) => void;
 };
-
-/**
- * Extracts the payload type from the target function.
- */
-type Payload<T> = T extends (...args: any[]) => void
-  ? Parameters<T>[0]
-  : undefined;
 
 /**
  * Indirect reference for Mutation entries.
