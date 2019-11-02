@@ -1,4 +1,3 @@
-import { DispatchOptions } from "vuex";
 import { Accessor, Payload } from "./accessor";
 import { getPath } from "./helpers";
 import { JustTypes } from "./just";
@@ -9,7 +8,10 @@ import { Ref } from "./ref";
  *
  * @template O identifies the object to filter.
  */
-export type JustMutations<O> = JustTypes<O, MutationRef<any>>;
+type JustMutations<T extends (...args: any[]) => any> = JustTypes<
+  ReturnType<T>,
+  MutationRef<any>
+>;
 
 /**
  * Extracts all `MutationRef` elements from `T`.
@@ -17,23 +19,25 @@ export type JustMutations<O> = JustTypes<O, MutationRef<any>>;
  * @template T is the function that generates the value.
  */
 export type MutationExtract<T extends (...args: any[]) => any> = {
-  [key in keyof JustMutations<ReturnType<T>>]: JustMutations<
-    ReturnType<T>
-  >[key] extends MutationRef<infer R>
-    ? (arg: any, payload: Payload<R>) => void
-    : (arg: any) => void;
+  [key in keyof JustMutations<T>]: JustMutations<T>[key] extends MutationRef<
+    infer F
+  >
+    ? StoreMutation<F>
+    : never;
 };
+
+type Mutation = ((payload: any) => void) | (() => void);
+type StoreMutation<M extends Mutation> = M extends () => void
+  ? (arg: any) => void
+  : (arg: any, payload: Payload<M>) => void;
 
 /**
  * Indirect reference for Mutation entries.
  *
  * @template T defines the mutation function.
  */
-export class MutationRef<
-  T extends (payload: any, options?: DispatchOptions) => void
-> extends Accessor<T>
-  implements
-    Ref<(arg: any, payload: Payload<T>, options?: DispatchOptions) => void> {
+export class MutationRef<T extends Mutation> extends Accessor<T>
+  implements Ref<(arg: any, payload: Payload<T>) => void> {
   /**
    * Create an indirect reference for Mutation entries.
    *
@@ -41,9 +45,8 @@ export class MutationRef<
    *
    * @param value is the value to set in the reference.
    */
-  public static create = <T extends (payload: any) => void>(
-    value: T
-  ): MutationRef<T> & T => new MutationRef(value) as any;
+  public static create = <T extends Mutation>(value: T): MutationRef<T> & T =>
+    new MutationRef(value) as any;
 
   /**
    * Provides the mutation function.
@@ -58,11 +61,7 @@ export class MutationRef<
   /**
    * Contains the Vuex-facing mutation function.
    */
-  public readonly mutations: (
-    arg: any,
-    payload: Payload<T>,
-    options?: DispatchOptions
-  ) => void;
+  public readonly mutations: StoreMutation<T>;
 
   constructor(value: T) {
     super((payload => {
@@ -75,10 +74,7 @@ export class MutationRef<
       return this.value(payload);
     }) as T);
     this.value = value;
-    this.mutations = (
-      _arg0: any,
-      payload: Payload<T>,
-      options?: DispatchOptions
-    ) => this.value(payload, options);
+    this.mutations = ((_arg0: any, payload: Payload<T>) =>
+      this.value(payload)) as any;
   }
 }

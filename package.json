@@ -57,6 +57,6 @@
     "vue": "^2.6.10",
     "vue-jest": "^3.0.5",
     "vue-template-compiler": "^2.6.10",
-    "vuex-functional": "^1.0.3"
+    "vuex-functional": "^1.0.4"
   }
 }

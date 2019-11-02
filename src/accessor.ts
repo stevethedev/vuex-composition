@@ -40,6 +40,6 @@ export abstract class Accessor<T extends (...args: any) => any> extends Functor<
 /**
  * Extracts the payload type from the target function.
  */
-export type Payload<T> = T extends (...args: any[]) => void
-  ? Parameters<T>[0]
+export type Payload<T> = T extends (...args: infer P) => unknown
+  ? P[0]
   : undefined;

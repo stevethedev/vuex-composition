@@ -1,4 +1,3 @@
-import { DispatchOptions } from "vuex";
 import { Accessor, Payload } from "./accessor";
 import { getPath } from "./helpers";
 import { JustTypes } from "./just";
@@ -29,17 +28,9 @@ export type ActionExtract<T extends (...args: any[]) => any> = {
  *
  * @template T defines the action function.
  */
-export class ActionRef<
-  T extends (payload: any, options?: DispatchOptions) => Promise<any>
-> extends Accessor<T>
-  implements
-    Ref<
-      (
-        arg: any,
-        payload: Payload<T>,
-        options?: DispatchOptions
-      ) => Promise<ReturnType<T>>
-    > {
+export class ActionRef<T extends (payload?: any) => Promise<any>>
+  extends Accessor<T>
+  implements Ref<(arg: any, payload: Payload<T>) => Promise<ReturnType<T>>> {
   /**
    * Create an indirect reference for Action entries.
    *
@@ -47,9 +38,7 @@ export class ActionRef<
    *
    * @param value is the value to set in the reference.
    */
-  public static create = <
-    T extends (payload: any, options?: DispatchOptions) => Promise<any>
-  >(
+  public static create = <T extends (payload: any) => Promise<any>>(
     value: T
   ): T & ActionRef<T> => new ActionRef(value) as any;
 
@@ -66,11 +55,7 @@ export class ActionRef<
   /**
    * Contains the Vuex-facing action function.
    */
-  public readonly actions: (
-    arg: any,
-    payload: Payload<T>,
-    options?: DispatchOptions
-  ) => Promise<any>;
+  public readonly actions: (arg: any, payload: Payload<T>) => Promise<any>;
 
   constructor(value: T) {
     super((async payload => {
@@ -81,10 +66,6 @@ export class ActionRef<
       return this.value(payload);
     }) as T);
     this.value = value;
-    this.actions = (
-      _arg0: any,
-      payload: Payload<T>,
-      options?: DispatchOptions
-    ) => this.value(payload, options);
+    this.actions = (_arg0: any, payload: Payload<T>) => this.value(payload);
   }
 }
