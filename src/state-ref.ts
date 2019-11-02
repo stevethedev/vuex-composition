@@ -35,7 +35,8 @@ export class StateRef<T> extends Accessor<(val?: T) => T> implements Ref<T> {
    *
    * @param value is the initial value to set in the reference.
    */
-  public static create = <T>(value: T) => new StateRef(value);
+  public static create = <T>(value: T): StateRef<T> & ((val?: T) => T) =>
+    new StateRef(value) as any;
 
   /**
    * Retrieve the internally-held value. TODO: This isn't retrieving variables properly. Regardless of namespace, module data is at this.store.state.path.to.module.variable

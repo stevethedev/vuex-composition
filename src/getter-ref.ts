@@ -37,8 +37,9 @@ export class GetterRef<T extends () => any> extends Accessor<T>
    *
    * @param value is the value to set in the reference.
    */
-  public static create = <T extends () => any>(value: T) =>
-    new GetterRef(value);
+  public static create = <T extends () => any>(
+    value: T
+  ): (() => ReturnType<T>) & GetterRef<T> => new GetterRef(value) as any;
 
   /**
    * Executes the getter and retrieves the value.
@@ -64,7 +65,7 @@ export class GetterRef<T extends () => any> extends Accessor<T>
   public readonly getters: T;
 
   constructor(value: T) {
-    super((() => this.value()) as any);
+    super((() => this.value) as any);
     this.getters = value;
   }
 }

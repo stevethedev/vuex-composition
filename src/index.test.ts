@@ -3,15 +3,8 @@ import Vue from "vue";
 import Vuex from "vuex";
 // tslint:disable-next-line
 import V from "vuex-functional";
-import {
-  action,
-  // createModule,
-  createStore,
-  getter,
-  module,
-  mutation,
-  state
-} from ".";
+import { action, createStore, getter, module, mutation, state } from ".";
+import { StoreOptions } from "./index";
 
 Vue.use(Vuex);
 
@@ -125,8 +118,18 @@ test("Can use unexported state values", () => {
   expect($state.value).toEqual(1);
 });
 
+test("Can access states via the functor api", () => {
+  const num = Math.random();
+
+  const $state = state(0);
+
+  $state(num);
+
+  expect($state()).toEqual(num);
+});
+
 test("Can use mutations", () => {
-  const $store = createStore(options);
+  const $store = V.into<StoreOptions<typeof options>>(createStore(options));
 
   V.mutations($store).SET_FOO({ foo: "blahblahblah" });
 
@@ -145,7 +148,7 @@ test("Can use unexported mutations", () => {
 });
 
 test("Can use getters", () => {
-  const $store = createStore(options);
+  const $store = V.into<StoreOptions<typeof options>>(createStore(options));
 
   expect($store.getters.getFoo).toEqual($store.state.foo);
 
@@ -159,6 +162,12 @@ test("Can use unexported getters", () => {
   expect($getter.value).toEqual(1);
 });
 
+test("Can use getters with the functor API", () => {
+  const $getter = getter(() => 1);
+
+  expect($getter()).toEqual(1);
+});
+
 test("Can use getters inside other getters", () => {
   const $store = createStore(options);
 
@@ -168,7 +177,7 @@ test("Can use getters inside other getters", () => {
 });
 
 test("Can use mutations inside other mutations", () => {
-  const $store = createStore(options);
+  const $store = V.into<StoreOptions<typeof options>>(createStore(options));
 
   const mutations: string[] = [];
   $store.subscribe(m => {
@@ -185,7 +194,7 @@ test("Can use mutations inside other mutations", () => {
 });
 
 test("Can use actions", async () => {
-  const $store = createStore(options);
+  const $store = V.into<StoreOptions<typeof options>>(createStore(options));
 
   expect(await V.actions($store).actionSend("test")).toEqual(["test", "test"]);
 });
@@ -197,7 +206,7 @@ test("Can use unexported actions", async () => {
 });
 
 test("Can nest actions", async () => {
-  const $store = createStore(options);
+  const $store = V.into<StoreOptions<typeof options>>(createStore(options));
 
   const actions: string[] = [];
   $store.subscribeAction(a => {
@@ -228,7 +237,7 @@ test("Can use unexported modules", () => {
 });
 
 test("Can use un-namespaced modules", () => {
-  const $store = createStore(options);
+  const $store = V.into<StoreOptions<typeof options>>(createStore(options));
   const $module = V.modules($store).bModule;
 
   expect($module.state.localBar).toEqual("bar");
@@ -239,7 +248,7 @@ test("Can use un-namespaced modules", () => {
 });
 
 test("Can use namespaced modules", () => {
-  const $store = createStore(options);
+  const $store = V.into<StoreOptions<typeof options>>(createStore(options));
   const $module = V.modules($store).nsModule;
 
   expect($module.state.bar).toEqual("bar");

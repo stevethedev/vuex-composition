@@ -1,5 +1,4 @@
-import Vuex from "vuex";
-import V, { Store } from "vuex-functional";
+import Vuex, { Store } from "vuex";
 import {
   getOptions,
   processOptions,
@@ -13,7 +12,7 @@ import { ActionRef } from "./action-ref";
 import { GetterRef } from "./getter-ref";
 import { ModuleRef } from "./module-ref";
 import { MutationRef } from "./mutation-ref";
-import { StateRef } from "./state-ref";
+import { StateExtract, StateRef } from "./state-ref";
 
 /**
  * Create an indirect reference for Action entries.
@@ -60,13 +59,25 @@ export const mutation = MutationRef.create;
  */
 export const state = StateRef.create;
 
-export function createStore<T extends StateFunction>(
+/**
+ * Provides the typing information for Vuex-Functional to read types.
+ */
+export type StoreOptions<T extends StoreParam<StateFunction>> = StoreModule<
+  T["setup"]
+>;
+
+/**
+ * Create a new Vuex store with the configuration options.
+ *
+ * @param obj provides the configuration options for creating the store.
+ */
+export const createStore = <T extends StateFunction>(
   obj: StoreParam<T>
-): Store<StoreModule<T>> {
+): Store<StateExtract<T>> => {
   const opt = getOptions(obj);
   const mod = processOptions(opt);
-  const store = V.into<StoreModule<T>>(new Vuex.Store(mod as any));
+  const store = new Vuex.Store<StateExtract<T>>(mod as any);
   setStore(opt, store);
 
   return store;
-}
+};

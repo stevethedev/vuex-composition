@@ -1,7 +1,7 @@
 {
-  "name": "vuex-composition",
+  "name": "vuex-composer",
   "version": "1.0.0",
-  "description": "Composition API for Vuex",
+  "description": "Opinionated Composition API implementation for Vuex",
   "keywords": [
     "vuex",
     "vue",
@@ -16,9 +16,14 @@
   "main": "dist/cjs/index.js",
   "module": "dist/es/index.js",
   "scripts": {
-    "build": "npm run build:es && npm run build:cjs",
-    "build:es": "tsc --module esnext --outDir dist/es",
+    "build": "npm run build:esm && npm run build:cjs && npm run build:amd && npm run build:es6 && npm run build:sys && npm run build:umd",
+    "build:rollup": "npx rollup -c rollup.config.js",
+    "build:esm": "tsc --module esnext --outdir dist/esm",
     "build:cjs": "tsc --module commonjs --outDir dist/cjs",
+    "build:amd": "tsc --module amd --outdir dist/amd",
+    "build:es6": "tsc --module es6 --outdir dist/es6",
+    "build:sys": "tsc --module system --outdir dist/sys",
+    "build:umd": "tsc --module umd --outdir dist/umd",
     "test": "jest --coverage",
     "lint": "npm run lint:tsc && npm run lint:tslint",
     "lint:tsc": "tsc --noEmit",
@@ -33,24 +38,25 @@
   },
   "license": "MIT",
   "dependencies": {
-    "vuex-functional": "^1.0.3",
     "vuex": "^3.1.1"
   },
   "devDependencies": {
-    "vue": "^2.6.10",
-    "@vue/composition-api": "^0.3.2",
     "@types/jest": "^24.0.21",
+    "@vue/composition-api": "^0.3.2",
     "@vue/test-utils": "^1.0.0-beta.29",
     "jest": "^24.9.0",
     "jsdom": "^15.2.0",
     "jsdom-global": "^3.0.2",
     "prettier": "^1.18.2",
+    "rollup-plugin-typescript": "^1.0.1",
     "ts-jest": "^24.1.0",
     "tslib": "^1.10.0",
     "tslint": "^5.20.0",
     "tslint-config-prettier": "^1.18.0",
     "typescript": "^3.6.4",
+    "vue": "^2.6.10",
     "vue-jest": "^3.0.5",
-    "vue-template-compiler": "^2.6.10"
+    "vue-template-compiler": "^2.6.10",
+    "vuex-functional": "^1.0.3"
   }
 }

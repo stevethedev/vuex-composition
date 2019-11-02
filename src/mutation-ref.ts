@@ -1,3 +1,4 @@
+import { DispatchOptions } from "vuex";
 import { Accessor, Payload } from "./accessor";
 import { getPath } from "./helpers";
 import { JustTypes } from "./just";
@@ -28,8 +29,11 @@ export type MutationExtract<T extends (...args: any[]) => any> = {
  *
  * @template T defines the mutation function.
  */
-export class MutationRef<T extends (payload: any) => void> extends Accessor<T>
-  implements Ref<(arg: any, payload: Payload<T>) => void> {
+export class MutationRef<
+  T extends (payload: any, options?: DispatchOptions) => void
+> extends Accessor<T>
+  implements
+    Ref<(arg: any, payload: Payload<T>, options?: DispatchOptions) => void> {
   /**
    * Create an indirect reference for Mutation entries.
    *
@@ -54,7 +58,11 @@ export class MutationRef<T extends (payload: any) => void> extends Accessor<T>
   /**
    * Contains the Vuex-facing mutation function.
    */
-  public readonly mutations: (arg: any, payload: Payload<T>) => void;
+  public readonly mutations: (
+    arg: any,
+    payload: Payload<T>,
+    options?: DispatchOptions
+  ) => void;
 
   constructor(value: T) {
     super((payload => {
@@ -67,6 +75,10 @@ export class MutationRef<T extends (payload: any) => void> extends Accessor<T>
       return this.value(payload);
     }) as T);
     this.value = value;
-    this.mutations = (_arg0: any, payload: Payload<T>) => this.value(payload);
+    this.mutations = (
+      _arg0: any,
+      payload: Payload<T>,
+      options?: DispatchOptions
+    ) => this.value(payload, options);
   }
 }
