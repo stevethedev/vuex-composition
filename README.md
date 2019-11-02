@@ -1,5 +1,10 @@
 # Vuex Composer
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/cbcf0e3eb3104da18df94bf45520663f)](https://www.codacy.com/manual/stevethedev/vuex-composition?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=stevethedev/vuex-composition&amp;utm_campaign=Badge_Grade)
+[![CodeFactor](https://www.codefactor.io/repository/github/stevethedev/vuex-functional/badge)](https://www.codefactor.io/repository/github/stevethedev/vuex-functional)
+[![Snyk](https://img.shields.io/snyk/vulnerabilities/github/stevethedev/vuex-composition)](https://img.shields.io/snyk/vulnerabilities/github/stevethedev/vuex-composition)
+
+
 This TypeScript library provides a Composition API-like interface for creating a Vuex store out of smaller parts. The goal of this project is to provide low-overhead and zero-configuration for composing Vuex stores.
 
 ## Browser Support
