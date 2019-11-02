@@ -1,4 +1,5 @@
 import { Store } from "vuex";
+import { getPath } from "./helpers";
 import { JustTypes } from "./just";
 import { ModuleRef } from "./module-ref";
 import { Ref } from "./ref";
@@ -46,7 +47,7 @@ export class GetterRef<T extends () => any> implements Ref<ReturnType<T>> {
    */
   public get value(): ReturnType<T> {
     if (this.store) {
-      const getterPath = this.getGetterPath();
+      const getterPath = getPath(this.title, this.parentModule);
       if (getterPath) {
         return this.store.getters[getterPath];
       }
@@ -97,18 +98,5 @@ export class GetterRef<T extends () => any> implements Ref<ReturnType<T>> {
     this.store = store;
     this.title = title;
     this.parentModule = parentModule;
-  }
-
-  /**
-   * Retrieves the internal module path as a string.
-   */
-  private getGetterPath(): string | null {
-    if (this.store && this.title) {
-      const path = this.parentModule
-        ? this.parentModule.getPath().join("/")
-        : null;
-      return path ? `${path}/${this.title}` : this.title;
-    }
-    return null;
   }
 }

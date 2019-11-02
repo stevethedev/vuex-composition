@@ -1,5 +1,6 @@
 import { Store } from "vuex";
 import { Functor } from "./functor";
+import { getPath } from "./helpers";
 import { JustTypes } from "./just";
 import { ModuleRef } from "./module-ref";
 import { Ref } from "./ref";
@@ -84,7 +85,7 @@ export class MutationRef<T extends (payload: any) => void> extends Functor<T>
   constructor(value: T) {
     super((payload => {
       if (this.store) {
-        const commitName = this.getCommitName();
+        const commitName = getPath(this.title, this.parentModule);
         if (commitName) {
           return this.store.commit(commitName, payload);
         }
@@ -109,18 +110,5 @@ export class MutationRef<T extends (payload: any) => void> extends Functor<T>
     this.store = store;
     this.title = title;
     this.parentModule = parentModule;
-  }
-
-  /**
-   * Retrieves the internal Commit name.
-   */
-  private getCommitName(): string | null {
-    if (this.title) {
-      const path = this.parentModule
-        ? this.parentModule.getPath().join("/")
-        : null;
-      return path ? `${path}/${this.title}` : this.title;
-    }
-    return null;
   }
 }

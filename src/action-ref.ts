@@ -1,5 +1,6 @@
 import { Store } from "vuex";
 import { Functor } from "./functor";
+import { getPath } from "./helpers";
 import { JustTypes } from "./just";
 import { ModuleRef } from "./module-ref";
 import { Ref } from "./ref";
@@ -84,7 +85,7 @@ export class ActionRef<T extends (payload: any) => Promise<any>>
 
   constructor(value: T) {
     super((async payload => {
-      const dispatch = this.getDispatchName();
+      const dispatch = getPath(this.title, this.parentModule);
       if (this.store && dispatch) {
         return this.store.dispatch(dispatch, payload);
       }
@@ -108,18 +109,5 @@ export class ActionRef<T extends (payload: any) => Promise<any>>
     this.store = store;
     this.title = title;
     this.parentModule = parentModule;
-  }
-
-  /**
-   * Retrieves the internal Dispatch name.
-   */
-  private getDispatchName(): string | null {
-    if (this.store && this.title) {
-      const path = this.parentModule
-        ? this.parentModule.getPath().join("/")
-        : null;
-      return path ? `${path}/${this.title}` : this.title;
-    }
-    return null;
   }
 }
