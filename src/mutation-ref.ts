@@ -1,8 +1,6 @@
-import { Store } from "vuex";
-import { Functor } from "./functor";
+import { Accessor } from "./accessor";
 import { getPath } from "./helpers";
 import { JustTypes } from "./just";
-import { ModuleRef } from "./module-ref";
 import { Ref } from "./ref";
 
 /**
@@ -37,7 +35,7 @@ type Payload<T> = T extends (...args: any[]) => void
  *
  * @template T defines the mutation function.
  */
-export class MutationRef<T extends (payload: any) => void> extends Functor<T>
+export class MutationRef<T extends (payload: any) => void> extends Accessor<T>
   implements Ref<(arg: any, payload: Payload<T>) => void> {
   /**
    * Create an indirect reference for Mutation entries.
@@ -65,21 +63,6 @@ export class MutationRef<T extends (payload: any) => void> extends Functor<T>
    */
   public readonly mutations: (arg: any, payload: Payload<T>) => void;
 
-  /**
-   * Reference to the store this is attached to.
-   */
-  public store?: Store<any>;
-
-  /**
-   * Name of the variable within the store.
-   */
-  public title?: string;
-
-  /**
-   * Contains a reference to the module that owns this reference.
-   */
-  private parentModule?: ModuleRef<any>;
-
   constructor(value: T) {
     super((payload => {
       if (this.store) {
@@ -92,21 +75,5 @@ export class MutationRef<T extends (payload: any) => void> extends Functor<T>
     }) as T);
     this.value = value;
     this.mutations = (_arg0: any, payload: Payload<T>) => this.value(payload);
-  }
-
-  /**
-   * Override the store and variable name to read/write.
-   *
-   * @param store contains the production-version of the store.
-   * @param title names the variable on the store.
-   */
-  public setStore(
-    store: Store<any>,
-    title: string,
-    parentModule?: ModuleRef<any>
-  ) {
-    this.store = store;
-    this.title = title;
-    this.parentModule = parentModule;
   }
 }

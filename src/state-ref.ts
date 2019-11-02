@@ -1,6 +1,5 @@
-import { Store } from "vuex";
+import { Accessor } from "./accessor";
 import { JustTypes } from "./just";
-import { ModuleRef } from "./module-ref";
 import { Ref } from "./ref";
 
 /**
@@ -28,7 +27,7 @@ export type StateExtract<T extends (...args: any[]) => any> = {
  *
  * @template T provides type-hinting for the state entry.
  */
-export class StateRef<T> implements Ref<T> {
+export class StateRef<T> extends Accessor<(val?: T) => T> implements Ref<T> {
   /**
    * Create an indirect reference for State entries.
    *
@@ -71,39 +70,14 @@ export class StateRef<T> implements Ref<T> {
    */
   private state: T;
 
-  /**
-   * Reference to the store this is attached to.
-   */
-  private store?: Store<any>;
-
-  /**
-   * Name of the variable within the store.
-   */
-  private title?: string;
-
-  /**
-   * Contains a reference to the module that owns this reference.
-   */
-  private parentModule?: ModuleRef<any>;
-
   constructor(value: T) {
+    super((val?: T) => {
+      if (val !== void 0) {
+        this.value = val;
+      }
+      return this.value;
+    });
     this.value = this.state = value;
-  }
-
-  /**
-   * Override the store and variable name to read/write.
-   *
-   * @param store contains the production-version of the store.
-   * @param title names the variable on the store.
-   */
-  public setStore(
-    store: Store<any>,
-    title: string,
-    parentModule?: ModuleRef<any>
-  ) {
-    this.store = store;
-    this.title = title;
-    this.parentModule = parentModule;
   }
 
   /**

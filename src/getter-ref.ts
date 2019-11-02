@@ -1,7 +1,6 @@
-import { Store } from "vuex";
+import { Accessor } from "./accessor";
 import { getPath } from "./helpers";
 import { JustTypes } from "./just";
-import { ModuleRef } from "./module-ref";
 import { Ref } from "./ref";
 
 /**
@@ -29,7 +28,8 @@ export type GetterExtract<T extends (...args: any[]) => any> = {
  *
  * @template T defines the getter-based function.
  */
-export class GetterRef<T extends () => any> implements Ref<ReturnType<T>> {
+export class GetterRef<T extends () => any> extends Accessor<T>
+  implements Ref<ReturnType<T>> {
   /**
    * Create an indirect reference for Getter entries.
    *
@@ -63,38 +63,8 @@ export class GetterRef<T extends () => any> implements Ref<ReturnType<T>> {
    */
   public readonly getters: T;
 
-  /**
-   * Reference to the store this is attached to.
-   */
-  private store?: Store<any>;
-
-  /**
-   * Name of the variable within the store.
-   */
-  private title?: string;
-
-  /**
-   * Contains the module that owns this value.
-   */
-  private parentModule?: ModuleRef<any>;
-
   constructor(value: T) {
+    super((() => this.value()) as any);
     this.getters = value;
-  }
-
-  /**
-   * Override the store and variable name to read/write.
-   *
-   * @param store contains the production-version of the store.
-   * @param title names the variable on the store.
-   */
-  public setStore(
-    store: Store<any>,
-    title: string,
-    parentModule?: ModuleRef<any>
-  ) {
-    this.store = store;
-    this.title = title;
-    this.parentModule = parentModule;
   }
 }

@@ -1,8 +1,6 @@
-import { Store } from "vuex";
-import { Functor } from "./functor";
+import { Accessor } from "./accessor";
 import { getPath } from "./helpers";
 import { JustTypes } from "./just";
-import { ModuleRef } from "./module-ref";
 import { Ref } from "./ref";
 
 /**
@@ -38,7 +36,7 @@ type Payload<T> = T extends (...args: any[]) => void
  * @template T defines the action function.
  */
 export class ActionRef<T extends (payload: any) => Promise<any>>
-  extends Functor<T>
+  extends Accessor<T>
   implements Ref<(arg: any, payload: Payload<T>) => Promise<ReturnType<T>>> {
   /**
    * Create an indirect reference for Action entries.
@@ -66,21 +64,6 @@ export class ActionRef<T extends (payload: any) => Promise<any>>
    */
   public readonly actions: (arg: any, payload: Payload<T>) => Promise<any>;
 
-  /**
-   * Reference to the store this is attached to.
-   */
-  public store?: Store<any>;
-
-  /**
-   * Name of the variable within the store.
-   */
-  public title?: string;
-
-  /**
-   * The module that hosts this structure.
-   */
-  private parentModule?: ModuleRef<any>;
-
   constructor(value: T) {
     super((async payload => {
       const dispatch = getPath(this.title, this.parentModule);
@@ -91,21 +74,5 @@ export class ActionRef<T extends (payload: any) => Promise<any>>
     }) as T);
     this.value = value;
     this.actions = (_arg0: any, payload: Payload<T>) => this.value(payload);
-  }
-
-  /**
-   * Override the store and variable name to read/write.
-   *
-   * @param store contains the production-version of the store.
-   * @param title names the variable on the store.
-   */
-  public setStore(
-    store: Store<any>,
-    title: string,
-    parentModule?: ModuleRef<any>
-  ) {
-    this.store = store;
-    this.title = title;
-    this.parentModule = parentModule;
   }
 }
