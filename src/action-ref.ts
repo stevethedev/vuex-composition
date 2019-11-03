@@ -38,7 +38,7 @@ export class ActionRef<T extends (payload?: any) => Promise<any>>
    *
    * @param value is the value to set in the reference.
    */
-  public static create = <T extends (payload: any) => Promise<any>>(
+  public static create = <T extends (payload?: any) => Promise<any>>(
     value: T
   ): T & ActionRef<T> => new ActionRef(value) as any;
 
