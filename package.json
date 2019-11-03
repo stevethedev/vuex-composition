@@ -1,6 +1,6 @@
 {
   "name": "vuex-composer",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Opinionated Composition API implementation for Vuex",
   "keywords": [
     "vuex",
