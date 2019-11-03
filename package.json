@@ -14,7 +14,7 @@
     "url": "https://github/com/stevethedev/vuex-composition/issues"
   },
   "main": "dist/cjs/index.js",
-  "module": "dist/es/index.js",
+  "module": "dist/esm/index.js",
   "scripts": {
     "build": "npm run build:esm && npm run build:cjs && npm run build:amd && npm run build:es6 && npm run build:sys && npm run build:umd",
     "build:rollup": "npx rollup -c rollup.config.js",
