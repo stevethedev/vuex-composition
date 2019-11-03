@@ -11,7 +11,6 @@ import {
   mutation,
   state,
   StoreOptions
-  // } from "../dist/esm";
 } from ".";
 
 Vue.use(Vuex);
@@ -54,7 +53,6 @@ const getActions = () => {
     ...(await actionSend(payload)),
     ...(await actionSend(payload))
   ]);
-  actionSend();
 
   return { actionSend, secondTier };
 };

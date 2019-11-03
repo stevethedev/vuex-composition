@@ -1,7 +1,5 @@
 import Vuex, { Store } from "vuex";
 import {
-  getOptions,
-  processOptions,
   setStore,
   SetupFunction,
   StoreModule,
@@ -72,10 +70,9 @@ export type StoreOptions<T extends StoreParam<any>> = StoreModule<T["setup"]>;
 export const createStore = <T extends SetupFunction>(
   obj: StoreParam<T>
 ): Store<StateExtract<T>> => {
-  const opt: ReturnType<T> = getOptions(obj);
-  const mod: StoreModule<T> = processOptions(opt);
-  const store = new Vuex.Store(mod);
-  setStore(opt, store);
+  const storeModule = module(obj);
+  const store = new Vuex.Store(storeModule.modules);
+  setStore(storeModule.value, store);
 
   return store;
 };

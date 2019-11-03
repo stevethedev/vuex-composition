@@ -1,5 +1,4 @@
 import { Accessor, Payload } from "./accessor";
-import { FunctorExecutor } from "./functor";
 import { getPath } from "./helpers";
 import { JustTypes } from "./just";
 import { SetupFunction, StoreModule } from "./module-defs";
@@ -47,9 +46,7 @@ export class MutationRef<T extends Mutation> extends Accessor<T>
    *
    * @param value is the value to set in the reference.
    */
-  public static create = <T extends Mutation>(
-    value: T
-  ): MutationRef<T> & FunctorExecutor<MutationRef<T>> =>
+  public static create = <T extends Mutation>(value: T): MutationRef<T> & T =>
     new MutationRef<T>(value) as any;
 
   /**

@@ -1,5 +1,4 @@
 import { Accessor } from "./accessor";
-import { FunctorExecutor } from "./functor";
 import { getPath } from "./helpers";
 import { JustTypes } from "./just";
 import { SetupFunction, StoreModule } from "./module-defs";
@@ -39,9 +38,7 @@ export class GetterRef<T extends () => any> extends Accessor<T>
    *
    * @param value is the value to set in the reference.
    */
-  public static create = <T extends () => any>(
-    value: T
-  ): GetterRef<T> & FunctorExecutor<GetterRef<T>> =>
+  public static create = <T extends () => any>(value: T): GetterRef<T> & T =>
     new GetterRef<T>(value) as any;
 
   /**
