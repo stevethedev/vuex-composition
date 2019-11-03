@@ -1,5 +1,6 @@
 import { Accessor } from "./accessor";
 import { JustTypes } from "./just";
+import { SetupFunction, StoreModule } from "./module-defs";
 import { Ref } from "./ref";
 
 /**
@@ -7,17 +8,18 @@ import { Ref } from "./ref";
  *
  * @template O identifies the object to filter.
  */
-type JustStates<O> = JustTypes<O, StateRef<any>>;
+type JustStates<T extends SetupFunction> = JustTypes<
+  ReturnType<T>,
+  StateRef<any>
+>;
 
 /**
  * Extracts all `StateRef` elements from `T`.
  *
  * @template T is the function that generates the value.
  */
-export type StateExtract<T extends (...args: any[]) => any> = {
-  [key in keyof JustStates<ReturnType<T>>]: JustStates<
-    ReturnType<T>
-  >[key] extends StateRef<infer R>
+export type StateExtract<T extends SetupFunction> = {
+  [key in keyof JustStates<T>]: JustStates<T>[key] extends StateRef<infer R>
     ? R
     : never;
 };
@@ -79,6 +81,11 @@ export class StateRef<T> extends Accessor<(val?: T) => T> implements Ref<T> {
       return this.value;
     });
     this.value = this.state = value;
+  }
+
+  public process(result: StoreModule<any>, key: string): StoreModule<any> {
+    result.state[key] = this.state;
+    return result;
   }
 
   /**

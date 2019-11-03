@@ -3,8 +3,16 @@ import Vue from "vue";
 import Vuex from "vuex";
 // tslint:disable-next-line
 import V from "vuex-functional";
-import { action, createStore, getter, module, mutation, state } from ".";
-import { StoreOptions } from "./index";
+import {
+  action,
+  createStore,
+  getter,
+  module,
+  mutation,
+  state,
+  StoreOptions
+  // } from "../dist/esm";
+} from ".";
 
 Vue.use(Vuex);
 
@@ -46,6 +54,7 @@ const getActions = () => {
     ...(await actionSend(payload)),
     ...(await actionSend(payload))
   ]);
+  actionSend();
 
   return { actionSend, secondTier };
 };
@@ -237,7 +246,9 @@ test("Can use unexported modules", () => {
 });
 
 test("Can use un-namespaced modules", () => {
-  const $store = V.into<StoreOptions<typeof options>>(createStore(options));
+  const $raw = createStore(options);
+  const $store = V.into<StoreOptions<typeof options>>($raw);
+
   const $module = V.modules($store).bModule;
 
   expect($module.state.localBar).toEqual("bar");

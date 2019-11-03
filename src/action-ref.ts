@@ -1,6 +1,8 @@
 import { Accessor, Payload } from "./accessor";
+import { FunctorExecutor } from "./functor";
 import { getPath } from "./helpers";
 import { JustTypes } from "./just";
+import { SetupFunction, StoreModule } from "./module-defs";
 import { Ref } from "./ref";
 
 /**
@@ -15,7 +17,7 @@ export type JustActions<O> = JustTypes<O, ActionRef<any>>;
  *
  * @template T is the function that generates the value.
  */
-export type ActionExtract<T extends (...args: any[]) => any> = {
+export type ActionExtract<T extends SetupFunction> = {
   [key in keyof JustActions<ReturnType<T>>]: JustActions<
     ReturnType<T>
   >[key] extends ActionRef<infer R>
@@ -38,9 +40,12 @@ export class ActionRef<T extends (payload?: any) => Promise<any>>
    *
    * @param value is the value to set in the reference.
    */
-  public static create = <T extends (payload?: any) => Promise<any>>(
+  public static create = <
+    T extends (() => Promise<any>) | ((payload: any) => Promise<any>)
+  >(
     value: T
-  ): T & ActionRef<T> => new ActionRef(value) as any;
+  ): ActionRef<T> & FunctorExecutor<ActionRef<T>> =>
+    new ActionRef<T>(value) as any;
 
   /**
    * Provides the action function.
@@ -67,5 +72,10 @@ export class ActionRef<T extends (payload?: any) => Promise<any>>
     }) as T);
     this.value = value;
     this.actions = (_arg0: any, payload: Payload<T>) => this.value(payload);
+  }
+
+  public process(result: StoreModule<any>, key: string): StoreModule<any> {
+    result.actions[key] = this.actions;
+    return result;
   }
 }

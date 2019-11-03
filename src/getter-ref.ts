@@ -1,6 +1,8 @@
 import { Accessor } from "./accessor";
+import { FunctorExecutor } from "./functor";
 import { getPath } from "./helpers";
 import { JustTypes } from "./just";
+import { SetupFunction, StoreModule } from "./module-defs";
 import { Ref } from "./ref";
 
 /**
@@ -15,7 +17,7 @@ type JustGetters<O> = JustTypes<O, GetterRef<any>>;
  *
  * @template T is the function that generates the value.
  */
-export type GetterExtract<T extends (...args: any[]) => any> = {
+export type GetterExtract<T extends SetupFunction> = {
   [key in keyof JustGetters<ReturnType<T>>]: JustGetters<
     ReturnType<T>
   >[key] extends GetterRef<infer R>
@@ -39,7 +41,8 @@ export class GetterRef<T extends () => any> extends Accessor<T>
    */
   public static create = <T extends () => any>(
     value: T
-  ): (() => ReturnType<T>) & GetterRef<T> => new GetterRef(value) as any;
+  ): GetterRef<T> & FunctorExecutor<GetterRef<T>> =>
+    new GetterRef<T>(value) as any;
 
   /**
    * Executes the getter and retrieves the value.
@@ -67,5 +70,10 @@ export class GetterRef<T extends () => any> extends Accessor<T>
   constructor(value: T) {
     super((() => this.value) as any);
     this.getters = value;
+  }
+
+  public process(result: StoreModule<any>, key: string): StoreModule<any> {
+    result.getters[key] = this.getters;
+    return result;
   }
 }

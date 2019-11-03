@@ -3,7 +3,7 @@ import {
   getOptions,
   processOptions,
   setStore,
-  StateFunction,
+  SetupFunction,
   StoreModule,
   StoreParam
 } from "./module-defs";
@@ -62,21 +62,19 @@ export const state = StateRef.create;
 /**
  * Provides the typing information for Vuex-Functional to read types.
  */
-export type StoreOptions<T extends StoreParam<StateFunction>> = StoreModule<
-  T["setup"]
->;
+export type StoreOptions<T extends StoreParam<any>> = StoreModule<T["setup"]>;
 
 /**
  * Create a new Vuex store with the configuration options.
  *
  * @param obj provides the configuration options for creating the store.
  */
-export const createStore = <T extends StateFunction>(
+export const createStore = <T extends SetupFunction>(
   obj: StoreParam<T>
 ): Store<StateExtract<T>> => {
-  const opt = getOptions(obj);
-  const mod = processOptions(opt);
-  const store = new Vuex.Store<StateExtract<T>>(mod as any);
+  const opt: ReturnType<T> = getOptions(obj);
+  const mod: StoreModule<T> = processOptions(opt);
+  const store = new Vuex.Store(mod);
   setStore(opt, store);
 
   return store;

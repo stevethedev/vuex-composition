@@ -1,5 +1,6 @@
 import { Store } from "vuex";
 import { Functor } from "./functor";
+import { StoreModule } from "./module-defs";
 import { ModuleRef } from "./module-ref";
 
 export abstract class Accessor<T extends (...args: any) => any> extends Functor<
@@ -35,6 +36,11 @@ export abstract class Accessor<T extends (...args: any) => any> extends Functor<
     this.title = title;
     this.parentModule = parentModule;
   }
+
+  public abstract process(
+    result: StoreModule<any>,
+    key: string
+  ): StoreModule<any>;
 }
 
 /**

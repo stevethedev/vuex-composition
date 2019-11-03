@@ -5,7 +5,7 @@ import {
   getOptions,
   processOptions,
   setStore,
-  StateFunction,
+  SetupFunction,
   StoreModule,
   StoreParam
 } from "./module-defs";
@@ -14,16 +14,19 @@ import { Ref } from "./ref";
 /**
  * Filters modules out of a larger object.
  */
-export type JustModules<O> = JustTypes<O, ModuleRef<any>>;
+export type JustModules<T extends SetupFunction> = JustTypes<
+  ReturnType<T>,
+  ModuleRef<any>
+>;
 
 /**
  * Extracts the module from the generated module information.
  */
-export type ModuleExtract<T extends (...args: any[]) => any> = {
-  [key in keyof JustModules<ReturnType<T>>]: JustModules<
-    ReturnType<T>
-  >[key] extends ModuleRef<infer R>
-    ? StoreModule<R["setup"]>
+export type ModuleExtract<T extends SetupFunction> = {
+  [key in keyof JustModules<T>]: JustModules<T>[key] extends ModuleRef<
+    StoreParam<infer S>
+  >
+    ? S
     : never;
 };
 
@@ -32,7 +35,10 @@ export type ModuleExtract<T extends (...args: any[]) => any> = {
  *
  * @template S contains the value of the `self` variable.
  */
-type InternalFunction<S> = ((fn?: (self: S) => unknown) => unknown) & (() => S);
+export interface InternalFunction<S> {
+  (): S;
+  <F extends (self: S) => any>(fn: F): ReturnType<F>;
+}
 
 /**
  * Represents a module reference, which will later be used to generate modules.
@@ -40,13 +46,13 @@ type InternalFunction<S> = ((fn?: (self: S) => unknown) => unknown) & (() => S);
 export class ModuleRef<T extends StoreParam<any>>
   extends Functor<InternalFunction<ReturnType<T["setup"]>>>
   implements Ref<ReturnType<T["setup"]>> {
-  public static create = <S extends StateFunction, T extends StoreParam<S>>(
+  public static create = <T extends StoreParam<any>>(
     value: T
-  ): InternalFunction<ReturnType<T["setup"]>> & ModuleRef<T> =>
-    new ModuleRef(value) as any;
+  ): ModuleRef<T> & InternalFunction<ReturnType<T["setup"]>> =>
+    new ModuleRef<T>(value) as any;
 
   /**
-   * Contains the return type of the `setup` function, which defines the moudle.
+   * Contains the return type of the `setup` function, which defines the module.
    */
   public readonly value: ReturnType<T["setup"]>;
 
@@ -58,7 +64,7 @@ export class ModuleRef<T extends StoreParam<any>>
   /**
    * Contains the value that is pushed back to the main process.
    */
-  public readonly modules: StoreModule<ReturnType<T["setup"]>>;
+  public readonly modules: StoreModule<T["setup"]>;
 
   /**
    * Reference to the store this is attached to.
@@ -81,7 +87,7 @@ export class ModuleRef<T extends StoreParam<any>>
   private readonly raw?: T;
 
   constructor(value: T) {
-    super((fn: (self: ReturnType<T["setup"]>) => any = self => self) =>
+    super((fn: (arg: any) => any = (s: ReturnType<T["setup"]>) => s) =>
       fn(this.value)
     );
     this.raw = value;
@@ -124,6 +130,11 @@ export class ModuleRef<T extends StoreParam<any>>
     if (this.title) {
       result.push(this);
     }
+    return result;
+  }
+
+  public process(result: StoreModule<any>, key: string): StoreModule<any> {
+    result.modules[key] = this.modules;
     return result;
   }
 }

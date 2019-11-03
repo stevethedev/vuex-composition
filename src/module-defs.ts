@@ -1,4 +1,4 @@
-import { Store } from "vuex";
+import { Store, StoreOptions as VSO } from "vuex";
 import { ActionExtract, ActionRef } from "./action-ref";
 import { GetterExtract, GetterRef } from "./getter-ref";
 import { ModuleExtract, ModuleRef } from "./module-ref";
@@ -8,7 +8,7 @@ import { StateExtract, StateRef } from "./state-ref";
 /**
  * Function definition for the options `setup()` method.
  */
-export type StateFunction = () => {
+export type SetupFunction = () => {
   [key: string]:
     | ActionRef<any>
     | GetterRef<any>
@@ -22,13 +22,15 @@ export type StateFunction = () => {
  *
  * @template T is the function that generated the options.
  */
-export interface StoreModule<T extends (...args: any[]) => any> {
+export interface StoreModule<T extends SetupFunction> extends VSO<any> {
   namespaced?: boolean;
   state: StateExtract<T>;
   getters: GetterExtract<T>;
   mutations: MutationExtract<T>;
   actions: ActionExtract<T>;
-  modules: ModuleExtract<T>;
+  modules: {
+    [key in keyof ModuleExtract<T>]: StoreModule<ModuleExtract<T>[key]>;
+  };
 }
 
 /**
@@ -36,7 +38,7 @@ export interface StoreModule<T extends (...args: any[]) => any> {
  *
  * @template T is a function that returns the configuration object.
  */
-export interface StoreParam<T extends StateFunction> {
+export interface StoreParam<T extends SetupFunction> {
   /**
    * On modules, this determines whether the content is on a sub-module.
    */
@@ -48,14 +50,7 @@ export interface StoreParam<T extends StateFunction> {
   setup: T;
 }
 
-/**
- * Marks all of the keys in `T` as optional.
- *
- * @template T is an object to make the keys optional.
- */
-type Options<T> = { [key in keyof T]?: T[key] };
-
-export function setStore<T extends StateFunction>(
+export function setStore<T extends SetupFunction>(
   opt: ReturnType<T>,
   store: Store<any>,
   parentModule?: ModuleRef<any>
@@ -81,20 +76,19 @@ export function getOptions<T extends StoreParam<any>>(
  *
  * @param options are the result from the `setup` function.
  */
-export function processOptions<T extends StateFunction>(
+export function processOptions<T extends SetupFunction>(
   options: ReturnType<T>
 ): StoreModule<T> {
   return Object.entries(options).reduce(
-    (result: Options<StoreModule<T>>, [key, value]) => {
-      if (!result[value.type]) {
-        result[value.type] = {} as any;
-      }
-
-      (result as StoreModule<T>)[value.type][key] =
-        value[value.type] || value.value;
-
-      return result;
+    (result: StoreModule<T>, [key, value]) => {
+      return value.process(result, key);
     },
-    {}
-  ) as any;
+    {
+      state: {},
+      getters: {},
+      mutations: {},
+      actions: {},
+      modules: {}
+    }
+  );
 }

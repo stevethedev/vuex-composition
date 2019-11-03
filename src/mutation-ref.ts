@@ -1,6 +1,8 @@
 import { Accessor, Payload } from "./accessor";
+import { FunctorExecutor } from "./functor";
 import { getPath } from "./helpers";
 import { JustTypes } from "./just";
+import { SetupFunction, StoreModule } from "./module-defs";
 import { Ref } from "./ref";
 
 /**
@@ -18,7 +20,7 @@ type JustMutations<T extends (...args: any[]) => any> = JustTypes<
  *
  * @template T is the function that generates the value.
  */
-export type MutationExtract<T extends (...args: any[]) => any> = {
+export type MutationExtract<T extends SetupFunction> = {
   [key in keyof JustMutations<T>]: JustMutations<T>[key] extends MutationRef<
     infer F
   >
@@ -45,8 +47,10 @@ export class MutationRef<T extends Mutation> extends Accessor<T>
    *
    * @param value is the value to set in the reference.
    */
-  public static create = <T extends Mutation>(value: T): MutationRef<T> & T =>
-    new MutationRef(value) as any;
+  public static create = <T extends Mutation>(
+    value: T
+  ): MutationRef<T> & FunctorExecutor<MutationRef<T>> =>
+    new MutationRef<T>(value) as any;
 
   /**
    * Provides the mutation function.
@@ -76,5 +80,10 @@ export class MutationRef<T extends Mutation> extends Accessor<T>
     this.value = value;
     this.mutations = ((_arg0: any, payload: Payload<T>) =>
       this.value(payload)) as any;
+  }
+
+  public process(result: StoreModule<any>, key: string): StoreModule<any> {
+    result.mutations[key] = this.mutations;
+    return result;
   }
 }
