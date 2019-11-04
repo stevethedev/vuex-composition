@@ -1,5 +1,4 @@
 import { Accessor, Payload } from "./accessor";
-import { FunctorExecutor } from "./functor";
 import { getPath } from "./helpers";
 import { JustTypes } from "./just";
 import { SetupFunction, StoreModule } from "./module-defs";
@@ -44,8 +43,7 @@ export class ActionRef<T extends (payload?: any) => Promise<any>>
     T extends (() => Promise<any>) | ((payload: any) => Promise<any>)
   >(
     value: T
-  ): ActionRef<T> & FunctorExecutor<ActionRef<T>> =>
-    new ActionRef<T>(value) as any;
+  ): ActionRef<T> & T => new ActionRef<T>(value) as any;
 
   /**
    * Provides the action function.
