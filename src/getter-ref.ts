@@ -65,7 +65,7 @@ export class GetterRef<T extends () => any> extends Accessor<() => T>
   public readonly getters: T;
 
   constructor(value: T) {
-    super((() => this.value) as any);
+    super(() => this.value);
     this.getters = value;
   }
 
