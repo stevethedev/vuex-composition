@@ -17,7 +17,6 @@
   "module": "dist/esm/index.js",
   "scripts": {
     "build": "npm run build:esm && npm run build:cjs && npm run build:amd && npm run build:es6 && npm run build:sys && npm run build:umd",
-    "build:rollup": "npx rollup -c rollup.config.js",
     "build:esm": "tsc --module esnext --outdir dist/esm",
     "build:cjs": "tsc --module commonjs --outDir dist/cjs",
     "build:amd": "tsc --module amd --outdir dist/amd",

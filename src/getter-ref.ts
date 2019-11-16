@@ -29,7 +29,8 @@ export type GetterExtract<T extends SetupFunction> = {
  *
  * @template T defines the getter-based function.
  */
-export class GetterRef<T extends () => any> extends Accessor<T>
+export class GetterRef<T extends () => any>
+  extends Accessor<() => ReturnType<T>>
   implements Ref<ReturnType<T>> {
   /**
    * Create an indirect reference for Getter entries.
@@ -65,7 +66,7 @@ export class GetterRef<T extends () => any> extends Accessor<T>
   public readonly getters: T;
 
   constructor(value: T) {
-    super((() => this.value) as any);
+    super(() => this.value);
     this.getters = value;
   }
 
