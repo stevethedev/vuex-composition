@@ -176,7 +176,7 @@ test("Can use getters with the functor API", () => {
 });
 
 test("Can use getters inside other getters", () => {
-  const $store = createStore(options);
+  const $store = V.into<StoreOptions<typeof options>>(createStore(options));
 
   expect($store.getters.getFooFoo).toEqual(
     $store.getters.getFoo + $store.getters.getFoo

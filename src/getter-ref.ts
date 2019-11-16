@@ -29,7 +29,8 @@ export type GetterExtract<T extends SetupFunction> = {
  *
  * @template T defines the getter-based function.
  */
-export class GetterRef<T extends () => any> extends Accessor<() => T>
+export class GetterRef<T extends () => any>
+  extends Accessor<() => ReturnType<T>>
   implements Ref<ReturnType<T>> {
   /**
    * Create an indirect reference for Getter entries.
