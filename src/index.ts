@@ -37,6 +37,7 @@ export const getter = GetterRef.create;
  *
  * @param value is the value to set in the reference.
  */
+// tslint:disable-next-line: no-unbound-method
 export const module = ModuleRef.create;
 
 /**
