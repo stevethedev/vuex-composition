@@ -16,7 +16,7 @@ export type JustActions<O> = JustTypes<O, ActionRef<any>>;
  *
  * @template T is the function that generates the value.
  */
-export type ActionExtract<T extends SetupFunction> = {
+export type ActionExtract<T extends SetupFunction<P>, P> = {
   [key in keyof JustActions<ReturnType<T>>]: JustActions<
     ReturnType<T>
   >[key] extends ActionRef<infer R>
@@ -72,7 +72,7 @@ export class ActionRef<T extends (payload?: any) => Promise<any>>
     this.actions = (_arg0: any, payload: Payload<T>) => this.value(payload);
   }
 
-  public process(result: StoreModule<any>, key: string): StoreModule<any> {
+  public process(result: StoreModule<any, any>, key: string): StoreModule<any, any> {
     result.actions[key] = this.actions;
     return result;
   }

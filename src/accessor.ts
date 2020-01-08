@@ -19,7 +19,7 @@ export abstract class Accessor<T extends (...args: any) => any> extends Functor<
   /**
    * Contains a reference to the module that owns this reference.
    */
-  protected parentModule?: ModuleRef<any>;
+  protected parentModule?: ModuleRef<any, any, any>;
 
   /**
    * Override the store and variable name to read/write.
@@ -30,7 +30,7 @@ export abstract class Accessor<T extends (...args: any) => any> extends Functor<
   public setStore(
     store: Store<any>,
     title: string,
-    parentModule?: ModuleRef<any>
+    parentModule?: ModuleRef<any, any, any>
   ) {
     this.store = store;
     this.title = title;
@@ -38,9 +38,9 @@ export abstract class Accessor<T extends (...args: any) => any> extends Functor<
   }
 
   public abstract process(
-    result: StoreModule<any>,
+    result: StoreModule<any, any>,
     key: string
-  ): StoreModule<any>;
+  ): StoreModule<any, any>;
 }
 
 /**
