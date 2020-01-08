@@ -14,17 +14,18 @@ import { Ref } from "./ref";
 /**
  * Filters modules out of a larger object.
  */
-export type JustModules<T extends SetupFunction> = JustTypes<
+export type JustModules<T extends SetupFunction<any>> = JustTypes<
   ReturnType<T>,
-  ModuleRef<any, any>
+  ModuleRef<any, any, any>
 >;
 
 /**
  * Extracts the module from the generated module information.
  */
-export type ModuleExtract<T extends SetupFunction> = {
+export type ModuleExtract<T extends SetupFunction<P>, P> = {
   [key in keyof JustModules<T>]: JustModules<T>[key] extends ModuleRef<
-    StoreParam<infer S>,
+    StoreParam<infer S, any>,
+    any,
     any
   >
     ? S
@@ -44,14 +45,21 @@ export interface InternalFunction<S> {
 /**
  * Represents a module reference, which will later be used to generate modules.
  */
-export class ModuleRef<T extends StoreParam<any>, P>
-  extends Functor<InternalFunction<ReturnType<T["setup"]>>>
+export class ModuleRef<
+  T extends StoreParam<F, P>,
+  F extends SetupFunction<P>,
+  P
+> extends Functor<InternalFunction<ReturnType<T["setup"]>>>
   implements Ref<ReturnType<T["setup"]>> {
-  public static create = <T extends StoreParam<any>, P>(
+  public static create = <
+    T extends StoreParam<F, P>,
+    F extends SetupFunction<P>,
+    P
+  >(
     value: T,
     param?: P
-  ): ModuleRef<T, P> & InternalFunction<ReturnType<T["setup"]>> =>
-    new ModuleRef<T, P>(value, param) as any;
+  ): ModuleRef<T, F, P> & InternalFunction<ReturnType<T["setup"]>> =>
+    new ModuleRef<T, F, P>(value, param) as any;
 
   /**
    * Contains the return type of the `setup` function, which defines the module.
@@ -66,7 +74,7 @@ export class ModuleRef<T extends StoreParam<any>, P>
   /**
    * Contains the value that is pushed back to the main process.
    */
-  public readonly modules: StoreModule<T["setup"]>;
+  public readonly modules: StoreModule<T["setup"], P>;
 
   /**
    * Reference to the store this is attached to.
@@ -81,7 +89,7 @@ export class ModuleRef<T extends StoreParam<any>, P>
   /**
    * Contains a reference to the module that owns this reference.
    */
-  private parentModule?: ModuleRef<any, any>;
+  private parentModule?: ModuleRef<any, any, any>;
 
   /**
    * The raw configuration value passed into the constructor.
@@ -107,7 +115,7 @@ export class ModuleRef<T extends StoreParam<any>, P>
   public setStore(
     store: Store<any>,
     title: string,
-    parentModule?: ModuleRef<any, any>
+    parentModule?: ModuleRef<any, any, any>
   ) {
     this.parentModule = parentModule;
     this.title = title;
@@ -127,7 +135,7 @@ export class ModuleRef<T extends StoreParam<any>, P>
   /**
    * Retrieves the list of ancestor modules that generated this one.
    */
-  public getAncestors(): Array<ModuleRef<any, any>> {
+  public getAncestors(): Array<ModuleRef<any, any, any>> {
     const result = this.parentModule ? this.parentModule.getAncestors() : [];
     if (this.title) {
       result.push(this);
@@ -135,7 +143,10 @@ export class ModuleRef<T extends StoreParam<any>, P>
     return result;
   }
 
-  public process(result: StoreModule<any>, key: string): StoreModule<any> {
+  public process(
+    result: StoreModule<any, any>,
+    key: string
+  ): StoreModule<any, any> {
     result.modules[key] = this.modules;
     return result;
   }

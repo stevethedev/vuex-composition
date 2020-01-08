@@ -60,17 +60,21 @@ export const state = StateRef.create;
 /**
  * Provides the typing information for Vuex-Functional to read types.
  */
-export type StoreOptions<T extends StoreParam<any>> = StoreModule<T["setup"]>;
+export type StoreOptions<T extends StoreParam<any, P>, P = any> = StoreModule<
+  T["setup"],
+  P
+>;
 
 /**
  * Create a new Vuex store with the configuration options.
  *
  * @param obj provides the configuration options for creating the store.
  */
-export const createStore = <T extends SetupFunction>(
-  obj: StoreParam<T>
-): Store<StateExtract<T>> => {
-  const storeModule = module(obj);
+export const createStore = <T extends SetupFunction<P>, P>(
+  obj: StoreParam<T, P>,
+  param?: P
+): Store<StateExtract<T, P>> => {
+  const storeModule = module(obj, param);
   const store = new Vuex.Store(storeModule.modules);
   setStore(storeModule.value, store);
 

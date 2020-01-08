@@ -19,7 +19,7 @@ type JustMutations<T extends (...args: any[]) => any> = JustTypes<
  *
  * @template T is the function that generates the value.
  */
-export type MutationExtract<T extends SetupFunction> = {
+export type MutationExtract<T extends SetupFunction<P>, P> = {
   [key in keyof JustMutations<T>]: JustMutations<T>[key] extends MutationRef<
     infer F
   >
@@ -79,7 +79,7 @@ export class MutationRef<T extends Mutation> extends Accessor<T>
       this.value(payload)) as any;
   }
 
-  public process(result: StoreModule<any>, key: string): StoreModule<any> {
+  public process(result: StoreModule<any, any>, key: string): StoreModule<any, any> {
     result.mutations[key] = this.mutations;
     return result;
   }

@@ -267,7 +267,7 @@ test("Can use namespaced modules", () => {
 test("Can pass parameter to module", () => {
   const $module = module(
     {
-      setup: (bool: boolean) => {
+      setup: bool => {
         return { foo: getter(() => bool) };
       }
     },
