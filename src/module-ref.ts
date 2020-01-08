@@ -16,7 +16,7 @@ import { Ref } from "./ref";
  */
 export type JustModules<T extends SetupFunction> = JustTypes<
   ReturnType<T>,
-  ModuleRef<any>
+  ModuleRef<any, any>
 >;
 
 /**
@@ -24,7 +24,8 @@ export type JustModules<T extends SetupFunction> = JustTypes<
  */
 export type ModuleExtract<T extends SetupFunction> = {
   [key in keyof JustModules<T>]: JustModules<T>[key] extends ModuleRef<
-    StoreParam<infer S>
+    StoreParam<infer S>,
+    any
   >
     ? S
     : never;
@@ -43,13 +44,14 @@ export interface InternalFunction<S> {
 /**
  * Represents a module reference, which will later be used to generate modules.
  */
-export class ModuleRef<T extends StoreParam<any>>
+export class ModuleRef<T extends StoreParam<any>, P>
   extends Functor<InternalFunction<ReturnType<T["setup"]>>>
   implements Ref<ReturnType<T["setup"]>> {
-  public static create = <T extends StoreParam<any>>(
-    value: T
-  ): ModuleRef<T> & InternalFunction<ReturnType<T["setup"]>> =>
-    new ModuleRef<T>(value) as any;
+  public static create = <T extends StoreParam<any>, P>(
+    value: T,
+    param?: P
+  ): ModuleRef<T, P> & InternalFunction<ReturnType<T["setup"]>> =>
+    new ModuleRef<T, P>(value, param) as any;
 
   /**
    * Contains the return type of the `setup` function, which defines the module.
@@ -79,19 +81,19 @@ export class ModuleRef<T extends StoreParam<any>>
   /**
    * Contains a reference to the module that owns this reference.
    */
-  private parentModule?: ModuleRef<any>;
+  private parentModule?: ModuleRef<any, any>;
 
   /**
    * The raw configuration value passed into the constructor.
    */
   private readonly raw?: T;
 
-  constructor(value: T) {
+  constructor(value: T, param?: P) {
     super((fn: (arg: any) => any = (s: ReturnType<T["setup"]>) => s) =>
       fn(this.value)
     );
     this.raw = value;
-    this.value = getOptions(this.raw);
+    this.value = getOptions(this.raw, param);
     this.modules = processOptions(this.value);
     this.modules.namespaced = this.raw.namespaced;
   }
@@ -105,7 +107,7 @@ export class ModuleRef<T extends StoreParam<any>>
   public setStore(
     store: Store<any>,
     title: string,
-    parentModule?: ModuleRef<any>
+    parentModule?: ModuleRef<any, any>
   ) {
     this.parentModule = parentModule;
     this.title = title;
@@ -125,7 +127,7 @@ export class ModuleRef<T extends StoreParam<any>>
   /**
    * Retrieves the list of ancestor modules that generated this one.
    */
-  public getAncestors(): Array<ModuleRef<any>> {
+  public getAncestors(): Array<ModuleRef<any, any>> {
     const result = this.parentModule ? this.parentModule.getAncestors() : [];
     if (this.title) {
       result.push(this);

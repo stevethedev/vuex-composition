@@ -263,3 +263,16 @@ test("Can use namespaced modules", () => {
   expect($module.state.bar).toEqual("bar");
   expect($module.getters.getBar).toEqual("bar");
 });
+
+test("Can pass parameter to module", () => {
+  const $module = module(
+    {
+      setup: (bool: boolean) => {
+        return { foo: getter(() => bool) };
+      }
+    },
+    true
+  );
+
+  expect($module(self => self.foo.value)).toEqual(true);
+});

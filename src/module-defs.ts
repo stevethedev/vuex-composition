@@ -12,7 +12,7 @@ export type SetupFunction = () => {
   [key: string]:
     | ActionRef<any>
     | GetterRef<any>
-    | ModuleRef<any>
+    | ModuleRef<any, any>
     | MutationRef<any>
     | StateRef<any>;
 };
@@ -53,7 +53,7 @@ export interface StoreParam<T extends SetupFunction> {
 export function setStore<T extends SetupFunction>(
   opt: ReturnType<T>,
   store: Store<any>,
-  parentModule?: ModuleRef<any>
+  parentModule?: ModuleRef<any, any>
 ) {
   Object.entries(opt).forEach(([key, value]) => {
     value.setStore(store, key, parentModule);
@@ -65,10 +65,11 @@ export function setStore<T extends SetupFunction>(
  *
  * @param obj The object with a setup value.
  */
-export function getOptions<T extends StoreParam<any>>(
-  obj: T
+export function getOptions<T extends StoreParam<any>, P>(
+  obj: T,
+  param?: P
 ): ReturnType<T["setup"]> {
-  return obj.setup();
+  return obj.setup(param);
 }
 
 /**
