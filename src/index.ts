@@ -37,6 +37,7 @@ export const getter = GetterRef.create;
  *
  * @param value is the value to set in the reference.
  */
+// tslint:disable-next-line: no-unbound-method
 export const module = ModuleRef.create;
 
 /**
@@ -70,13 +71,23 @@ export type StoreOptions<T extends StoreParam<any, P>, P = any> = StoreModule<
  *
  * @param obj provides the configuration options for creating the store.
  */
-export const createStore = <T extends SetupFunction<P>, P>(
-  obj: StoreParam<T, P>,
-  param?: P
-): Store<StateExtract<T, P>> => {
-  const storeModule = module(obj, param);
+export function createStore<
+  T extends StoreParam<F, never>,
+  F extends SetupFunction<never>
+>(obj: T): Store<StateExtract<F, never>>;
+export function createStore<
+  T extends StoreParam<F, P>,
+  F extends SetupFunction<P>,
+  P
+>(obj: T, param: P): Store<StateExtract<F, P>>;
+export function createStore<
+  T extends StoreParam<F, P>,
+  F extends SetupFunction<P>,
+  P
+>(obj: T, param?: P): Store<StateExtract<F, P>> {
+  const storeModule = module<T, F, P>(obj, param as P);
   const store = new Vuex.Store(storeModule.modules);
   setStore(storeModule.value, store);
 
   return store;
-};
+}

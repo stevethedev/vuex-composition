@@ -51,15 +51,30 @@ export class ModuleRef<
   P
 > extends Functor<InternalFunction<ReturnType<T["setup"]>>>
   implements Ref<ReturnType<T["setup"]>> {
-  public static create = <
+  public static create<
+    T extends StoreParam<F, never>,
+    F extends SetupFunction<never>
+  >(
+    value: T
+  ): ModuleRef<T, F, never> & InternalFunction<ReturnType<T["setup"]>>;
+  public static create<
+    T extends StoreParam<F, P>,
+    F extends SetupFunction<P>,
+    P
+  >(
+    value: T,
+    param: P
+  ): ModuleRef<T, F, P> & InternalFunction<ReturnType<T["setup"]>>;
+  public static create<
     T extends StoreParam<F, P>,
     F extends SetupFunction<P>,
     P
   >(
     value: T,
     param?: P
-  ): ModuleRef<T, F, P> & InternalFunction<ReturnType<T["setup"]>> =>
-    new ModuleRef<T, F, P>(value, param) as any;
+  ): ModuleRef<T, F, P> & InternalFunction<ReturnType<T["setup"]>> {
+    return new ModuleRef<T, F, P>(value, param) as any;
+  }
 
   /**
    * Contains the return type of the `setup` function, which defines the module.
