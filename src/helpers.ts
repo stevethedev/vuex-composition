@@ -7,7 +7,7 @@ import { ModuleRef } from "./module-ref";
  */
 export const getPath = (
   title?: string,
-  parentModule?: ModuleRef<any, any>
+  parentModule?: ModuleRef<any>
 ): string | null => {
   if (title) {
     return parentModule

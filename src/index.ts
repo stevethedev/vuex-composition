@@ -8,9 +8,11 @@ import {
 
 import { ActionRef } from "./action-ref";
 import { GetterRef } from "./getter-ref";
-import { ModuleRef } from "./module-ref";
+import { Module, ModuleRef } from "./module-ref";
 import { MutationRef } from "./mutation-ref";
 import { StateExtract, StateRef } from "./state-ref";
+
+export { Module };
 
 /**
  * Create an indirect reference for Action entries.
@@ -61,28 +63,25 @@ export const state = StateRef.create;
 /**
  * Provides the typing information for Vuex-Functional to read types.
  */
-export type StoreOptions<T extends StoreParam<any, P>, P = any> = StoreModule<
-  T["setup"],
-  P
->;
+export type StoreOptions<T extends StoreParam<any>> = StoreModule<T["setup"]>;
 
 /**
  * Create a new Vuex store with the configuration options.
  *
  * @param obj provides the configuration options for creating the store.
  */
-export function createStore<T extends StoreParam<SetupFunction<never>, never>>(
-  obj: T
-): Store<StateExtract<SetupFunction<never>, never>>;
-export function createStore<T extends StoreParam<SetupFunction<P>, P>, P>(
-  obj: T,
-  param: P
-): Store<StateExtract<SetupFunction<P>, P>>;
-export function createStore<T extends StoreParam<SetupFunction<P>, P>, P>(
-  obj: T,
-  param?: P
-): Store<StateExtract<SetupFunction<P>, P>> {
-  const storeModule = module<T, P>(obj, param as P);
+export function createStore<T extends StoreParam<SetupFunction<any>>>(
+  ...args: T extends StoreParam<SetupFunction<infer P>>
+    ? never | undefined extends P
+      ? [T]
+      : [T, P]
+    : [T]
+): Store<
+  StateExtract<
+    SetupFunction<T extends StoreParam<SetupFunction<infer P>> ? P : never>
+  >
+> {
+  const storeModule = module(...(args as [T]));
   const store = new Vuex.Store(storeModule.modules);
   setStore(storeModule.value, store);
 

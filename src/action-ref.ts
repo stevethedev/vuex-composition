@@ -72,7 +72,7 @@ export class ActionRef<T extends (payload?: any) => Promise<any>>
     this.actions = (_arg0: any, payload: Payload<T>) => this.value(payload);
   }
 
-  public process(result: StoreModule<any, any>, key: string): StoreModule<any, any> {
+  public process(result: StoreModule<any>, key: string): StoreModule<any> {
     result.actions[key] = this.actions;
     return result;
   }
