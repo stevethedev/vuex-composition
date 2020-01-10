@@ -14,7 +14,7 @@ export type SetupFunction<P> = (
   [key: string]:
     | ActionRef<any>
     | GetterRef<any>
-    | ModuleRef<any, any, any>
+    | ModuleRef<any, any>
     | MutationRef<any>
     | StateRef<any>;
 };
@@ -58,7 +58,7 @@ export interface StoreParam<T extends SetupFunction<P>, P> {
 export function setStore<T extends SetupFunction<P>, P>(
   opt: ReturnType<T>,
   store: Store<any>,
-  parentModule?: ModuleRef<any, any, any>
+  parentModule?: ModuleRef<any, any>
 ) {
   Object.entries(opt).forEach(([key, value]) => {
     value.setStore(store, key, parentModule);

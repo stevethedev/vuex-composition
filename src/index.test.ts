@@ -110,7 +110,7 @@ const options = {
 };
 
 test("Can get the state from the store", () => {
-  const $store = V.into<StoreOptions<typeof options>>(createStore(options));
+  const $store = createStore(options);
 
   expect($store.state.foo).toEqual("bar");
 });
