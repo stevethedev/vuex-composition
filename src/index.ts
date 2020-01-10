@@ -8,9 +8,11 @@ import {
 
 import { ActionRef } from "./action-ref";
 import { GetterRef } from "./getter-ref";
-import { ModuleRef } from "./module-ref";
+import { Module, ModuleRef } from "./module-ref";
 import { MutationRef } from "./mutation-ref";
 import { StateExtract, StateRef } from "./state-ref";
+
+export { Module };
 
 /**
  * Create an indirect reference for Action entries.
@@ -61,31 +63,27 @@ export const state = StateRef.create;
 /**
  * Provides the typing information for Vuex-Functional to read types.
  */
-export type StoreOptions<T extends StoreParam<any, P>, P = any> = StoreModule<
-  T["setup"],
-  P
->;
+export type StoreOptions<T extends StoreParam<any>> = StoreModule<T["setup"]>;
 
 /**
  * Create a new Vuex store with the configuration options.
  *
  * @param obj provides the configuration options for creating the store.
  */
-export function createStore<
-  T extends StoreParam<F, never>,
-  F extends SetupFunction<never>
->(obj: T): Store<StateExtract<F, never>>;
-export function createStore<
-  T extends StoreParam<F, P>,
-  F extends SetupFunction<P>,
-  P
->(obj: T, param: P): Store<StateExtract<F, P>>;
-export function createStore<
-  T extends StoreParam<F, P>,
-  F extends SetupFunction<P>,
-  P
->(obj: T, param?: P): Store<StateExtract<F, P>> {
-  const storeModule = module<T, F, P>(obj, param as P);
+export function createStore<T extends StoreParam<SetupFunction<never>>>(
+  obj: T
+): Store<StateExtract<SetupFunction<never>>>;
+
+export function createStore<T extends StoreParam<SetupFunction<any>>>(
+  obj: T,
+  param: T extends StoreParam<SetupFunction<infer P>> ? P : never
+): Store<StateExtract<T extends StoreParam<infer SP> ? SP : never>>;
+
+export function createStore<T extends StoreParam<SetupFunction<any>>>(
+  obj: T,
+  param?: T extends StoreParam<SetupFunction<infer P>> ? P : never
+): Store<StateExtract<T extends StoreParam<infer SP> ? SP : never>> {
+  const storeModule = module(obj, param as any);
   const store = new Vuex.Store(storeModule.modules);
   setStore(storeModule.value, store);
 

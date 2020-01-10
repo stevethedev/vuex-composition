@@ -100,6 +100,18 @@ const $store = createStore({
     // Module values can also be accessed from other module sor the root store.
     console.log(myModule(self => self.getPennies())); // 700
 
+    // Pass parameters to the module setup function:
+    const pModule = module({
+      namespaced: true,
+      setup(b: boolean) {
+        return {
+          booleanValue: state(b)
+        };
+      }
+    }, false);
+
+    console.log(pModule(self => self.booleanValue())); // false
+
     /*
      |-------------------------------------------------------------------------
      | Output to Store

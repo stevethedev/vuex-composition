@@ -16,7 +16,7 @@ type JustGetters<O> = JustTypes<O, GetterRef<any>>;
  *
  * @template T is the function that generates the value.
  */
-export type GetterExtract<T extends SetupFunction<P>, P> = {
+export type GetterExtract<T extends SetupFunction<any>> = {
   [key in keyof JustGetters<ReturnType<T>>]: JustGetters<
     ReturnType<T>
   >[key] extends GetterRef<infer R>
@@ -70,10 +70,7 @@ export class GetterRef<T extends () => any>
     this.getters = value;
   }
 
-  public process(
-    result: StoreModule<any, any>,
-    key: string
-  ): StoreModule<any, any> {
+  public process(result: StoreModule<any>, key: string): StoreModule<any> {
     result.getters[key] = this.getters;
     return result;
   }

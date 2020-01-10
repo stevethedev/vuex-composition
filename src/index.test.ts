@@ -8,6 +8,7 @@ import {
   createStore,
   getter,
   module,
+  Module,
   mutation,
   state,
   StoreOptions
@@ -57,41 +58,39 @@ const getActions = () => {
   return { actionSend, secondTier };
 };
 
-const getNamespacedModule = () =>
-  module({
-    namespaced: true,
-    setup: () => {
-      const bar = state("bar");
+const namespacedModule = {
+  namespaced: true,
+  setup: () => {
+    const bar = state("bar");
 
-      const getBar = getter(() => bar.value);
+    const getBar = getter(() => bar.value);
 
-      return {
-        bar,
-        getBar
-      };
-    }
-  });
+    return {
+      bar,
+      getBar
+    };
+  }
+};
 
-const getBaseModule = (nsModule: ReturnType<typeof getNamespacedModule>) =>
-  module({
-    namespaced: false,
-    setup: () => {
-      const getNonNamespacedBar = getter(() => {
-        return nsModule(self => self.getBar.value);
-      });
+const baseModule = {
+  namespaced: false,
+  setup: (nsModule: Module<typeof namespacedModule>) => {
+    const getNonNamespacedBar = getter(() => {
+      return nsModule(self => self.getBar.value);
+    });
 
-      const localBar = state("bar");
-      const getPlainBar = getter(() => localBar.value);
-      const getChainedBar = getter(() => getPlainBar.value);
+    const localBar = state("bar");
+    const getPlainBar = getter(() => localBar.value);
+    const getChainedBar = getter(() => getPlainBar.value);
 
-      return { getChainedBar, getPlainBar, localBar, getNonNamespacedBar };
-    }
-  });
+    return { getChainedBar, getPlainBar, localBar, getNonNamespacedBar };
+  }
+};
 
 const options = {
   setup: () => {
-    const nsModule = getNamespacedModule();
-    const bModule = getBaseModule(nsModule);
+    const nsModule = module(namespacedModule);
+    const bModule = module(baseModule, nsModule);
     const fooOptions = getFooOptions();
     const bahOptions = getBahOptions();
     const fooBahOptions = getFooBahOptions(fooOptions, bahOptions);
@@ -265,14 +264,15 @@ test("Can use namespaced modules", () => {
 });
 
 test("Can pass parameter to module", () => {
+  const NUMBER = Math.random();
   const $module = module(
     {
-      setup: bool => {
+      setup: (bool: number) => {
         return { foo: getter(() => bool) };
       }
     },
-    true
+    NUMBER
   );
 
-  expect($module(self => self.foo.value)).toEqual(true);
+  expect($module(self => self.foo.value)).toEqual(NUMBER);
 });

@@ -8,32 +8,33 @@ import { StateExtract, StateRef } from "./state-ref";
 /**
  * Function definition for the options `setup()` method.
  */
-export type SetupFunction<P> = (
-  param?: P
-) => {
+export type SetupFunction<P> = [P] extends [never]
+  ? () => SetupFunctionResult
+  : (param: P) => SetupFunctionResult;
+
+interface SetupFunctionResult {
   [key: string]:
     | ActionRef<any>
     | GetterRef<any>
-    | ModuleRef<any, any, any>
+    | ModuleRef<any>
     | MutationRef<any>
     | StateRef<any>;
-};
+}
 
 /**
  * Represents the store module output.
  *
  * @template T is the function that generated the options.
  */
-export interface StoreModule<T extends SetupFunction<P>, P> extends VSO<any> {
+export interface StoreModule<T extends SetupFunction<any>> extends VSO<any> {
   namespaced?: boolean;
-  state: StateExtract<T, P>;
-  getters: GetterExtract<T, P>;
-  mutations: MutationExtract<T, P>;
+  state: StateExtract<T>;
+  getters: GetterExtract<T>;
+  mutations: MutationExtract<T>;
   actions: ActionExtract<T, any>;
   modules: {
     [key in keyof ModuleExtract<T, any>]: StoreModule<
-      ModuleExtract<T, any>[key],
-      any
+      ModuleExtract<T, any>[key]
     >;
   };
 }
@@ -43,7 +44,7 @@ export interface StoreModule<T extends SetupFunction<P>, P> extends VSO<any> {
  *
  * @template T is a function that returns the configuration object.
  */
-export interface StoreParam<T extends SetupFunction<P>, P> {
+export interface StoreParam<T extends SetupFunction<any>> {
   /**
    * On modules, this determines whether the content is on a sub-module.
    */
@@ -58,7 +59,7 @@ export interface StoreParam<T extends SetupFunction<P>, P> {
 export function setStore<T extends SetupFunction<P>, P>(
   opt: ReturnType<T>,
   store: Store<any>,
-  parentModule?: ModuleRef<any, any, any>
+  parentModule?: ModuleRef<any>
 ) {
   Object.entries(opt).forEach(([key, value]) => {
     value.setStore(store, key, parentModule);
@@ -70,7 +71,7 @@ export function setStore<T extends SetupFunction<P>, P>(
  *
  * @param obj The object with a setup value.
  */
-export function getOptions<T extends StoreParam<any, P>, P>(
+export function getOptions<T extends StoreParam<any>, P>(
   obj: T,
   param?: P
 ): ReturnType<T["setup"]> {
@@ -82,11 +83,11 @@ export function getOptions<T extends StoreParam<any, P>, P>(
  *
  * @param options are the result from the `setup` function.
  */
-export function processOptions<T extends SetupFunction<P>, P>(
+export function processOptions<T extends SetupFunction<any>>(
   options: ReturnType<T>
-): StoreModule<T, P> {
+): StoreModule<T> {
   return Object.entries(options).reduce(
-    (result: StoreModule<any, any>, [key, value]) => {
+    (result: StoreModule<any>, [key, value]) => {
       return value.process(result, key);
     },
     {
