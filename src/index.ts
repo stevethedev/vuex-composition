@@ -12,7 +12,7 @@ import { Module, ModuleRef } from "./module-ref";
 import { MutationRef } from "./mutation-ref";
 import { StateExtract, StateRef } from "./state-ref";
 
-export { Module };
+export { Module, ActionRef, GetterRef, MutationRef, StateRef };
 
 /**
  * Create an indirect reference for Action entries.
