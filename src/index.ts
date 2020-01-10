@@ -70,18 +70,20 @@ export type StoreOptions<T extends StoreParam<any>> = StoreModule<T["setup"]>;
  *
  * @param obj provides the configuration options for creating the store.
  */
+export function createStore<T extends StoreParam<SetupFunction<never>>>(
+  obj: T
+): Store<StateExtract<SetupFunction<never>>>;
+
 export function createStore<T extends StoreParam<SetupFunction<any>>>(
-  ...args: T extends StoreParam<SetupFunction<infer P>>
-    ? never | undefined extends P
-      ? [T]
-      : [T, P]
-    : [T]
-): Store<
-  StateExtract<
-    SetupFunction<T extends StoreParam<SetupFunction<infer P>> ? P : never>
-  >
-> {
-  const storeModule = module(...(args as [T]));
+  obj: T,
+  param: T extends StoreParam<SetupFunction<infer P>> ? P : never
+): Store<StateExtract<T extends StoreParam<infer SP> ? SP : never>>;
+
+export function createStore<T extends StoreParam<SetupFunction<any>>>(
+  obj: T,
+  param?: T extends StoreParam<SetupFunction<infer P>> ? P : never
+): Store<StateExtract<T extends StoreParam<infer SP> ? SP : never>> {
+  const storeModule = module(obj, param as any);
   const store = new Vuex.Store(storeModule.modules);
   setStore(storeModule.value, store);
 

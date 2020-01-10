@@ -8,25 +8,18 @@ import { StateExtract, StateRef } from "./state-ref";
 /**
  * Function definition for the options `setup()` method.
  */
-export type SetupFunction<P> = P extends never
-  ? () => {
-      [key: string]:
-        | ActionRef<any>
-        | GetterRef<any>
-        | ModuleRef<any>
-        | MutationRef<any>
-        | StateRef<any>;
-    }
-  : (
-      param: P
-    ) => {
-      [key: string]:
-        | ActionRef<any>
-        | GetterRef<any>
-        | ModuleRef<any>
-        | MutationRef<any>
-        | StateRef<any>;
-    };
+export type SetupFunction<P> = [P] extends [never]
+  ? () => SetupFunctionResult
+  : (param: P) => SetupFunctionResult;
+
+interface SetupFunctionResult {
+  [key: string]:
+    | ActionRef<any>
+    | GetterRef<any>
+    | ModuleRef<any>
+    | MutationRef<any>
+    | StateRef<any>;
+}
 
 /**
  * Represents the store module output.

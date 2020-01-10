@@ -49,11 +49,21 @@ export type Module<T extends StoreParam<SetupFunction<any>>> = ModuleRef<T> &
 export class ModuleRef<T extends StoreParam<SetupFunction<any>>>
   extends Functor<InternalFunction<ReturnType<T["setup"]>>>
   implements Ref<ReturnType<T["setup"]>> {
+  // -
+  public static create<T extends StoreParam<SetupFunction<never>>>(
+    obj: T
+  ): Module<T>;
+
   public static create<T extends StoreParam<SetupFunction<any>>>(
-    value: T,
+    obj: T,
+    param: T extends StoreParam<SetupFunction<infer P>> ? P : never
+  ): Module<T>;
+
+  public static create<T extends StoreParam<SetupFunction<any>>>(
+    obj: T,
     param?: T extends StoreParam<SetupFunction<infer P>> ? P : never
   ): Module<T> {
-    return new ModuleRef<T>(value, param) as any;
+    return new ModuleRef<T>(obj, param) as any;
   }
 
   /**
