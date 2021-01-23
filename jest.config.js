@@ -24,10 +24,9 @@ module.exports = {
   testEnvironment: "node",
   moduleDirectories: ["node_modules", "src"],
   modulePaths: ["<rootDir>/src", "<rootDir>/node_modules"],
-  moduleFileExtensions: ["js", "json", "ts", "vue"],
+  moduleFileExtensions: ["js", "json", "ts"],
   transform: {
     "^.+\\.ts$": "ts-jest",
-    "^.+\\.(vue)$": "vue-jest"
   },
   roots: ["<rootDir>/src"],
   globals: { NODE_ENV: "test" }

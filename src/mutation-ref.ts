@@ -3,6 +3,7 @@ import { getPath } from "./helpers";
 import { JustTypes } from "./just";
 import { SetupFunction, StoreModule } from "./module-defs";
 import { Ref } from "./ref";
+import {Mutation as VuexMutation} from "vuex";
 
 /**
  * Extracts _only_ the keys that contain `MutationRef` elements.
@@ -11,7 +12,7 @@ import { Ref } from "./ref";
  */
 type JustMutations<T extends (...args: any[]) => any> = JustTypes<
   ReturnType<T>,
-  MutationRef<any>
+  MutationRef<VuexMutation<any>>
 >;
 
 /**
@@ -28,6 +29,7 @@ export type MutationExtract<T extends SetupFunction<any>> = {
 };
 
 type Mutation = ((payload: any) => void) | (() => void);
+
 type StoreMutation<M extends Mutation> = M extends () => void
   ? (arg: any) => void
   : (arg: any, payload: Payload<M>) => void;

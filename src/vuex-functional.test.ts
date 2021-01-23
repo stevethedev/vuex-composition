@@ -1,11 +1,5 @@
-// tslint:disable-next-line
-import Vue from "vue";
-import Vuex from "vuex";
-// tslint:disable-next-line
 import V from "vuex-functional";
 import { createStore, module, mutation, state, StoreOptions as CSO } from ".";
-
-Vue.use(Vuex);
 
 function getRootStore() {
   return V.into<CSO<typeof storeOptions>>(createStore(storeOptions));

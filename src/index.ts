@@ -1,4 +1,4 @@
-import Vuex, { Store } from "vuex";
+import { Store, createStore as createVuexStore } from "vuex";
 import {
   setStore,
   SetupFunction,
@@ -39,7 +39,7 @@ export const getter = GetterRef.create;
  *
  * @param value is the value to set in the reference.
  */
-// tslint:disable-next-line: no-unbound-method
+// eslint-disable-next-line @typescript-eslint/unbound-method
 export const module = ModuleRef.create;
 
 /**
@@ -66,6 +66,15 @@ export const state = StateRef.create;
 export type StoreOptions<T extends StoreParam<any>> = StoreModule<T["setup"]>;
 
 /**
+ * A convenience function that type-checks the store-creation.
+ * 
+ * @param options Options object to type-check.
+ */
+export function createOptions<T extends StoreParam<any>>(options: T): T {
+  return options;
+}
+
+/**
  * Create a new Vuex store with the configuration options.
  *
  * @param obj provides the configuration options for creating the store.
@@ -76,7 +85,7 @@ export function createStore<T extends StoreParam<SetupFunction<never>>>(
 
 export function createStore<T extends StoreParam<SetupFunction<any>>>(
   obj: T,
-  param: T extends StoreParam<SetupFunction<infer P>> ? P : never
+  param?: T extends StoreParam<SetupFunction<infer P>> ? P : never
 ): Store<StateExtract<T extends StoreParam<infer SP> ? SP : never>>;
 
 export function createStore<T extends StoreParam<SetupFunction<any>>>(
@@ -84,7 +93,7 @@ export function createStore<T extends StoreParam<SetupFunction<any>>>(
   param?: T extends StoreParam<SetupFunction<infer P>> ? P : never
 ): Store<StateExtract<T extends StoreParam<infer SP> ? SP : never>> {
   const storeModule = module(obj, param as any);
-  const store = new Vuex.Store(storeModule.modules);
+  const store = createVuexStore(storeModule.modules);
   setStore(storeModule.value, store);
 
   return store;
