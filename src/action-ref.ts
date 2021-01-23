@@ -9,7 +9,7 @@ import { Ref } from "./ref";
  *
  * @template O identifies the object to filter.
  */
-export type JustActions<O> = JustTypes<O, ActionRef<any>>;
+type JustActions<O> = JustTypes<O, ActionRef<(payload?: any) => Promise<any>>>;
 
 /**
  * Extracts all `ActionRef` elements from `T`.

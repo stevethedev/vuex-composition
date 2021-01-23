@@ -1,4 +1,4 @@
-import { Store, StoreOptions as VSO } from "vuex";
+import { Mutation, Store, StoreOptions as VSO } from "vuex";
 import { ActionExtract, ActionRef } from "./action-ref";
 import { GetterExtract, GetterRef } from "./getter-ref";
 import { ModuleExtract, ModuleRef } from "./module-ref";
@@ -14,10 +14,10 @@ export type SetupFunction<P> = [P] extends [never]
 
 interface SetupFunctionResult {
   [key: string]:
-    | ActionRef<any>
+    | ActionRef<(payload?: any) => Promise<any>>
     | GetterRef<any>
     | ModuleRef<any>
-    | MutationRef<any>
+    | MutationRef<Mutation<any>>
     | StateRef<any>;
 }
 

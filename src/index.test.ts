@@ -1,10 +1,7 @@
-// tslint:disable-next-line
-import Vue from "vue";
-import Vuex from "vuex";
-// tslint:disable-next-line
 import V from "vuex-functional";
 import {
   action,
+  createOptions,
   createStore,
   getter,
   module,
@@ -14,8 +11,6 @@ import {
   StoreOptions
 } from ".";
 
-Vue.use(Vuex);
-
 const getFooOptions = () => {
   const foo = state("bar");
   const getFoo = getter(() => foo.value);
@@ -24,7 +19,12 @@ const getFooOptions = () => {
     foo.value = payload.foo;
   });
 
-  return { foo, getFoo, getFooFoo, SET_FOO };
+  return {
+    foo,
+    getFoo,
+    getFooFoo,
+    SET_FOO,
+  };
 };
 
 const getBahOptions = () => {
@@ -87,7 +87,7 @@ const baseModule = {
   }
 };
 
-const options = {
+const options = createOptions({
   setup: () => {
     const nsModule = module(namespacedModule);
     const bModule = module(baseModule, nsModule);
@@ -106,7 +106,7 @@ const options = {
       bModule
     };
   }
-};
+});
 
 test("Can get the state from the store", () => {
   const $store = V.into<StoreOptions<typeof options>>(createStore(options));
